@@ -1,0 +1,12 @@
+{
+  "author": "",
+  "name": "tryfer",
+  "description": "Port of the tryfer Twisted/Python tracing library and Zipkin client",
+  "version": "0.0.0",
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
