@@ -1,25 +1,19 @@
 
-var ass = require('assert');
+//var ass = require('assert');
 var util = require('util');
+
+var _ = require("underscore");
+
 var trace = require('../trace');
 
 var MAX_ID = Math.pow(2, 31) -1;
 
-ass.isNum = function(num, message){
-  ass.equal(isNaN(num), false,
-    util.format("%s is not number like", num));
-};
+// ass.isNum = function(num, message){
+//   ass.equal(isNaN(num), false,
+//     util.format("%s is not number like", num));
+// };
 
 var tracers = require('../tracers');
-
-var run_test = function(testFunc){
-  return function(test, assert){
-    tracers.setTracers([]);
-    testFunc(assert);
-    tracers.setTracers([]);
-    test.finish();
-  };
-};
 
 var mockTracer = function(name, id, endpoint){
   var self = this;
@@ -32,46 +26,69 @@ var mockTracer = function(name, id, endpoint){
   };
 };
 
+var tests = {
+  test_new_trace: function(assert){
+    var t = new trace.Trace('test_trace');
+    assert.notEqual(t.traceId, undefined);
+    //assert.isNum(t.traceId);
+    assert.ok(t.traceId < MAX_ID);
 
-exports.test_new_trace = run_test(function(assert){
-  var t = new trace.Trace('test_trace');
-  assert.notEqual(t.traceId, undefined);
-  assert.isNum(t.traceId);
-  assert.ok(t.traceId < MAX_ID);
+    assert.notEqual(t.spanId, undefined);
+    //assert.isNum(t.spanId);
+    assert.ok(t.spanId < MAX_ID);
 
-  assert.notEqual(t.spanId, undefined);
-  assert.isNum(t.spanId);
-  assert.ok(t.spanId < MAX_ID);
+    assert.equal(t.parentSpanId, undefined);
+  },
+  test_trace_child: function(assert){
+    var t = new trace.Trace('test_trace', {traceId: 1, spanId: 1});
+    var c = t.child('child_test_trace');
+    assert.equal(c.traceId, 1);
+    assert.equal(c.parentSpanId, 1);
+  },
+  test_record_invokes_tracer: function(assert){
+    var tracer, t, a;
+    tracer = new mockTracer();
+    t = new trace.Trace('test_trace', {
+      traceId: 1, spanId: 1, tracers: [tracer]
+    });
+    a = trace.Annotation.clientSend(0);
+    t.record(a);
+    assert.deepEqual(tracer._calls.record[0], [t,a]);
+  }
+};
 
-  assert.equal(t.parentSpanId, undefined);
+var run_test = function(name, testFunc){
+  return function(test, assert){
+    f = test.finish;
+    test.finish = function(){
+      try{
+        throw new Error();
+      }catch (e){
+        console.log(name, e.stack);
+      }
+      f();
+    };
+    tracers.setTracers([]);
+    testFunc(assert, test);
+    tracers.setTracers([]);
+    test.finish();
+  };
+};
+
+_.each(tests, function(testFunc, name){
+  exports[name] = run_test(name, testFunc);
 });
 
-exports.test_trace_child = run_test(function(assert){
-  var t = new trace.Trace('test_trace', {traceId: 1, spanId: 1});
-  var c = t.child('child_test_trace');
-  assert.equal(c.traceId, 1);
-  assert.equal(c.parentSpanId, 1);
-  assert.notEqual(c.spanId, 1);
-});
-// });
-// class TraceTests(TestCase):
+
+
 //     def 
 //         
 
 //         
-
 //         
 //         
+
 //         
-
-//     def test_record_invokes_tracer(self):
-//         tracer = mock.Mock()
-
-//         t = Trace('test_trace', trace_id=1, span_id=1, tracers=[tracer])
-//         annotation = Annotation.client_send(timestamp=0)
-//         t.record(annotation)
-
-//         tracer.record.assert_called_with(t, annotation)
 
 //     def test_record_sets_annotation_endpoint(self):
 //         tracer = mock.Mock()
