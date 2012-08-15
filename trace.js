@@ -22,23 +22,25 @@ var getUniqueId = function () {
  *    parentSpanId {number} The unique id of the parent span
  * @param {Array} tracers An array of tracers
  */
-function Trace (name, optionalIds, tracers) {
+function Trace (name, options) {
   var self = this;
   self.name = name;
 
-  if (optionalIds === undefined) {
-    optionalIds = {};
-  }
+  options = options || {};
 
-  _.each(['traceId', 'spanId', 'parentSpanId'], function(idName) {
-    if (_.has(optionalIds, idName) && optionalIds[idName]) {
-      self[idName] = optionalIds[idName];
-    } else {
+  ['traceId', 'spanId', 'parentSpanId'].forEach(function(idName) {
+    if (_.has(options, idName) && options[idName]) {
+      self[idName] = options[idName];
+    } else if (idName !== 'parentSpanId') {
       self[idName] = getUniqueId();
     }
   });
 
-  this._tracers = tracers === undefined ? _tracers.getTracers() : tracers;
+  if (_.has(options, 'tracers') && options.tracers){
+    self._tracers = options.tracers;
+  } else {
+    self._tracers = _tracers.getTracers();
+  }
 }
 
 /**
@@ -47,8 +49,10 @@ function Trace (name, optionalIds, tracers) {
  * @param {String} name The name of the child tracer
  */
 Trace.prototype.child = function (name) {
-  var optionalArgs = {traceId: this.traceId, parentSpanId:self.parentSpanId};
-  return new Trace(name, optionalArgs, this._tracers);
+  var self = this;
+  var optionalArgs = {traceId: self.traceId,
+    parentSpanId: self.spanId};
+  return new Trace(name, optionalArgs, self._tracers);
 };
 
 /**
@@ -62,7 +66,7 @@ Trace.prototype.record = function (annotation) {
     annotation.endpoint = this.endpoint;
   }
 
-  _.each(this._tracers, function(value) {
+  _.each(self._tracers, function(value) {
     value.record(self, annotation);
   });
 };
