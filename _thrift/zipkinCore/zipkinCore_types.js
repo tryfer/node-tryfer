@@ -3,8 +3,9 @@
 //
 // DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 //
-
-AnnotationType = {
+var Thrift = require('thrift').Thrift;
+var ttypes = module.exports = {};
+ttypes.AnnotationType = {
 'BOOL' : 0,
 'BYTES' : 1,
 'I16' : 2,
@@ -13,7 +14,7 @@ AnnotationType = {
 'DOUBLE' : 5,
 'STRING' : 6
 };
-Endpoint = function(args) {
+var Endpoint = module.exports.Endpoint = function(args) {
   this.ipv4 = null;
   this.port = null;
   this.service_name = null;
@@ -45,21 +46,21 @@ Endpoint.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.ipv4 = input.readI32().value;
+        this.ipv4 = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.I16) {
-        this.port = input.readI16().value;
+        this.port = input.readI16();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.STRING) {
-        this.service_name = input.readString().value;
+        this.service_name = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -95,7 +96,7 @@ Endpoint.prototype.write = function(output) {
   return;
 };
 
-Annotation = function(args) {
+var Annotation = module.exports.Annotation = function(args) {
   this.timestamp = null;
   this.value = null;
   this.host = null;
@@ -127,21 +128,21 @@ Annotation.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I64) {
-        this.timestamp = input.readI64().value;
+        this.timestamp = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.value = input.readString().value;
+        this.value = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.STRUCT) {
-        this.host = new Endpoint();
+        this.host = new ttypes.Endpoint();
         this.host.read(input);
       } else {
         input.skip(ftype);
@@ -178,7 +179,7 @@ Annotation.prototype.write = function(output) {
   return;
 };
 
-BinaryAnnotation = function(args) {
+var BinaryAnnotation = module.exports.BinaryAnnotation = function(args) {
   this.key = null;
   this.value = null;
   this.annotation_type = null;
@@ -214,28 +215,28 @@ BinaryAnnotation.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.key = input.readString().value;
+        this.key = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.value = input.readString().value;
+        this.value = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.I32) {
-        this.annotation_type = input.readI32().value;
+        this.annotation_type = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
       if (ftype == Thrift.Type.STRUCT) {
-        this.host = new Endpoint();
+        this.host = new ttypes.Endpoint();
         this.host.read(input);
       } else {
         input.skip(ftype);
@@ -277,7 +278,7 @@ BinaryAnnotation.prototype.write = function(output) {
   return;
 };
 
-Span = function(args) {
+var Span = module.exports.Span = function(args) {
   this.trace_id = null;
   this.name = null;
   this.id = null;
@@ -321,28 +322,28 @@ Span.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I64) {
-        this.trace_id = input.readI64().value;
+        this.trace_id = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.STRING) {
-        this.name = input.readString().value;
+        this.name = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
       if (ftype == Thrift.Type.I64) {
-        this.id = input.readI64().value;
+        this.id = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 5:
       if (ftype == Thrift.Type.I64) {
-        this.parent_id = input.readI64().value;
+        this.parent_id = input.readI64();
       } else {
         input.skip(ftype);
       }
@@ -359,7 +360,7 @@ Span.prototype.read = function(input) {
         for (var _i5 = 0; _i5 < _size0; ++_i5)
         {
           var elem6 = null;
-          elem6 = new Annotation();
+          elem6 = new ttypes.Annotation();
           elem6.read(input);
           this.annotations.push(elem6);
         }
@@ -380,7 +381,7 @@ Span.prototype.read = function(input) {
         for (var _i12 = 0; _i12 < _size7; ++_i12)
         {
           var elem13 = null;
-          elem13 = new BinaryAnnotation();
+          elem13 = new ttypes.BinaryAnnotation();
           elem13.read(input);
           this.binary_annotations.push(elem13);
         }
@@ -453,7 +454,7 @@ Span.prototype.write = function(output) {
   return;
 };
 
-CLIENT_SEND = 'cs';
-CLIENT_RECV = 'cr';
-SERVER_SEND = 'ss';
-SERVER_RECV = 'sr';
+ttypes.CLIENT_SEND = 'cs';
+ttypes.CLIENT_RECV = 'cr';
+ttypes.SERVER_SEND = 'ss';
+ttypes.SERVER_RECV = 'sr';

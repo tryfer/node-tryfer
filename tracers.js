@@ -10,6 +10,7 @@ var globalTracers = [];
  * @param {Stream} destination Stream to write annotations to
  */
 function DebugTracer (destination) {
+  var self = this;
   self.destination = destination;
 }
 
@@ -20,7 +21,8 @@ function DebugTracer (destination) {
  * @param {Annotation} annotation Annotation to write
  */
 DebugTracer.prototype.record = function (trace, annotation) {
-  var trace_str = ['traceId', 'parentSpanId', 'spanId', 'name'].map(
+  var self = this,
+      trace_str = ['traceId', 'parentSpanId', 'spanId', 'name'].map(
                     function (key) { return trace[key]; }
                   ).join(':'),
       annotation_str = annotation.name + " = " + annotation.value + ":" +
@@ -32,6 +34,6 @@ DebugTracer.prototype.record = function (trace, annotation) {
 };
 
 exports.DebugTracer = DebugTracer;
-exports.getTracer = function () { return globalTracers; };
+exports.getTracers = function () { return globalTracers; };
 exports.pushTracer = function (tracer) { globalTracers.push(tracer); };
 exports.setTracer = function (tracers) { globalTracers = tracers; };
