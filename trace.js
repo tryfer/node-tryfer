@@ -6,7 +6,6 @@ var _ = require('underscore');
 var _tracers = require('./tracers');
 var zipkinCore_types = require('./_thrift/zipkinCore/zipkinCore_types');
 var largestRandom  = Math.pow(2, 31) - 1;
-debugger;
 
 var getUniqueId = function () {
   return Math.floor(Math.random() * largestRandom);

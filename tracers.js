@@ -36,4 +36,6 @@ DebugTracer.prototype.record = function (trace, annotation) {
 exports.DebugTracer = DebugTracer;
 exports.getTracers = function () { return globalTracers; };
 exports.pushTracer = function (tracer) { globalTracers.push(tracer); };
-exports.setTracer = function (tracers) { globalTracers = tracers; };
+exports.setTracers = function (tracers) {
+  globalTracers = [].concat(tracers);
+};
