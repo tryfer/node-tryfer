@@ -4,7 +4,8 @@ var util = require('util');
 
 var _ = require("underscore");
 
-var trace = require('../trace');
+var trace = require('..').trace;
+var tracers = require('..').tracers;
 
 var MAX_ID = Math.pow(2, 31) -1;
 
@@ -13,7 +14,6 @@ ass.isNum = function(num, message){
     util.format("%s is not number like", num));
 };
 
-var tracers = require('../tracers');
 
 var mockTracer = function(name, id, endpoint){
   var self = this;
@@ -34,7 +34,7 @@ module.exports = {
     },
     tearDown: function(cb){
       tracers.setTracers([]);
-      cb();    
+      cb();
     },
     test_new_trace: function(test){
       var t = new trace.Trace('test_trace');

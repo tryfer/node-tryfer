@@ -1,4 +1,4 @@
-var tracers = require('../tracers');
+var tracers = require('..').tracers;
 
 module.exports = {
   test_set_tracers: function(test){
