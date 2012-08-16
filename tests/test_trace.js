@@ -93,7 +93,7 @@ module.exports = {
     tearDown: function(cb){
       var self = this;
       Date.now = self.origDate;
-      cb();    
+      cb();
     },
     test_timestamp: function(test) {
       var a = trace.Annotation.timestamp('test');
