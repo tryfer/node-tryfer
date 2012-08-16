@@ -16,10 +16,8 @@
 
 basedir=`dirname $0`
 
-NODE_PATH=${basedir}/../lib-cov:$NODE_PATH ./node_modules/.bin/whiskey --real-time \
-  --tests "tests/test_tracer.js \
-tests/test_trace.js"
+./node_modules/.bin/nodeunit tests
 
 echo "Running linter..."
-# ./bin/lint
+#./bin/lint
 echo "Linting complete."

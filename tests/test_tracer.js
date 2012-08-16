@@ -1,37 +1,39 @@
 var tracers = require('../tracers');
 
-var run_test = function(testFunc){
-  return function(test, assert){
+module.exports = {
+  test_set_tracers: function(test){
+    var tracer = ["a"];
+    tracers.setTracers(tracer);
+    test.deepEqual(tracers.getTracers(), tracer);
+    test.done();
+  },
+  test_push_tracer: function(test){
+    var dummy_tracer = "1";
+    var dummy_tracer2 = "2";
+
+    tracers.pushTracer(dummy_tracer);
+    test.deepEqual(tracers.getTracers(), [dummy_tracer]);
+    tracers.pushTracer(dummy_tracer2);
+    test.deepEqual(tracers.getTracers(),
+      [dummy_tracer, dummy_tracer2]);
+    test.done();
+  },
+  test_set_trace_args: function(test){
+    var tracer = ["i'm a tracer"];
+    tracers.setTracers(tracer);
+    test.deepEqual(tracers.getTracers(), tracer);
+
+    tracer = 2;
+    tracers.setTracers(tracer);
+    test.deepEqual(tracers.getTracers(), [tracer]);
+    test.done();
+  },
+  setUp: function(cb){
     tracers.setTracers([]);
-    testFunc(assert);
+    cb();
+  },
+  tearDown: function(cb){
     tracers.setTracers([]);
-    test.finish();
-  };
+    cb();
+  }
 };
-
-exports.test_set_tracers = run_test(function(assert){
-  var tracer = ["a"];
-  tracers.setTracers(tracer);
-  assert.deepEqual(tracers.getTracers(), tracer);
-});
-
-exports.test_push_tracer = run_test(function(assert){
-  var dummy_tracer = "1";
-  var dummy_tracer2 = "2";
-
-  tracers.pushTracer(dummy_tracer);
-  assert.deepEqual(tracers.getTracers(), [dummy_tracer]);
-  tracers.pushTracer(dummy_tracer2);
-  assert.deepEqual(tracers.getTracers(),
-    [dummy_tracer, dummy_tracer2]);
-});
-
-exports.test_set_trace_args = run_test(function(assert){
-  var tracer = ["i'm a tracer"];
-  tracers.setTracers(tracer);
-  assert.deepEqual(tracers.getTracers(), tracer);
-
-  tracer = 2;
-  tracers.setTracers(tracer);
-  assert.deepEqual(tracers.getTracers(), [tracer]);
-});
