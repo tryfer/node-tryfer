@@ -1,7 +1,7 @@
 
-var ass = require('nodeunit').assert;
 var util = require('util');
 
+var ass = require('nodeunit').assert;
 var _ = require("underscore");
 
 var trace = require('..').trace;
