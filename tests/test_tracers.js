@@ -57,5 +57,54 @@ module.exports = {
                  "mytime = 100:timestamp\n");
       test.done();
     }
+  },
+  endAnnotationTracer: {
+    setUp: function(cb){
+      var self = this;
+      self.sent_traces = [];
+      self.tracer = new tracers.EndAnnotationTracer(
+        function(trace, annotations) {
+          self.sent_traces.push([trace, annotations]);
+        });
+      self.non_end_annotations = [
+        trace.Annotation.timestamp('mytime', 1),
+        trace.Annotation.clientSend(1),
+        trace.Annotation.serverRecv(1),
+        trace.Annotation.string("myname", "myval")
+      ];
+      cb();
+    },
+    test_record_non_end_annotations_does_not_send: function(test) {
+      var self = this;
+      var t = new trace.Trace('mytrace');
+      self.non_end_annotations.forEach(function(annotation) {
+        self.tracer.record(t, annotation);
+        test.equal(self.sent_traces.length, 0);
+      });
+      test.done();
+    },
+    test_record_sends_all_stored_on_end_annotation: function(test) {
+      var self = this;
+      var t = new trace.Trace('mytrace');
+      var end_annotation = trace.Annotation.clientRecv(2);
+      self.non_end_annotations.forEach(function(annotation) {
+        self.tracer.record(t, annotation);
+      });
+
+      self.tracer.record(t, end_annotation);
+      test.equal(self.sent_traces.length, 1);
+      test.deepEqual(self.sent_traces[0],
+                     [t, self.non_end_annotations.concat([end_annotation])]);
+      test.done();
+    },
+    test_record_sends_on_clientRecv_and_serverSend: function(test) {
+      var self = this;
+      self.tracer.record(new trace.Trace('clientRecv'),
+                         trace.Annotation.clientRecv(2));
+      self.tracer.record(new trace.Trace('serverSend'),
+                         trace.Annotation.serverSend(2));
+      test.equal(self.sent_traces.length, 2);
+      test.done();
+    }
   }
 };
