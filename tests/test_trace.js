@@ -129,6 +129,13 @@ module.exports = {
       test.equal(a.name, 'sr');
       test.equal(a.annotationType, 'timestamp');
       test.done();
+    },
+    test_string: function(test) {
+      var a = trace.Annotation.string('myname', 'ispie');
+      test.equal(a.value, 'ispie');
+      test.equal(a.name, 'myname');
+      test.equal(a.annotationType, 'string');
+      test.done();
     }
   }
 };
