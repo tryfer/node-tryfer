@@ -52,9 +52,9 @@ module.exports = {
       a = new trace.Annotation.timestamp('mytime', 100);
       debug_tracer.record(t, a);
 
-      test.equal("---\nAdding annotation for trace: 1:1:2:test\n\t" +
-                 "mytime = 100:timestamp\n",
-                 written);
+      test.equal(written,
+                 "---\nAdding annotation for trace: 1:1:2:test\n\t" +
+                 "mytime = 100:timestamp\n");
       test.done();
     }
   }
