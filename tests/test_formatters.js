@@ -29,11 +29,13 @@ module.exports = {
           }
         ]
       };
-      test.deepEqual(JSON.parse(formatters.formatForRestkin(t, a)), expected);
-      test.done();
-    }
-  },
-  test_trace_with_parentSpanId: function(test){
+      formatters.formatForRestkin(t, a, function(error, value) {
+        test.equal(error, null);
+        test.deepEqual(JSON.parse(value), expected);
+        test.done();
+      });
+    },
+    test_trace_with_parentSpanId: function(test){
       var t, a, expected;
       t = new trace.Trace('test', {parentSpanId:1, spanId: 2, traceId:5});
       a = [];
@@ -44,10 +46,13 @@ module.exports = {
         name: 'test',
         annotations: []
       };
-      test.deepEqual(JSON.parse(formatters.formatForRestkin(t, a)), expected);
-      test.done();
-  },
-  test_trace_with_annotation_with_endpoint: function(test) {
+      formatters.formatForRestkin(t, a, function(error, value) {
+        test.equal(error, null);
+        test.deepEqual(JSON.parse(value), expected);
+        test.done();
+      });
+    },
+    test_trace_with_annotation_with_endpoint: function(test) {
       var t, a, expected;
       t = new trace.Trace('test', {spanId: 1, traceId:5});
       a = [new trace.Annotation('name1', 1, 'test',
@@ -69,7 +74,39 @@ module.exports = {
           }
         ]
       };
-      test.deepEqual(JSON.parse(formatters.formatForRestkin(t, a)), expected);
-      test.done();
+      formatters.formatForRestkin(t, a, function(error, value) {
+        test.equal(error, null);
+        test.deepEqual(JSON.parse(value), expected);
+        test.done();
+      });
+    }
+  },
+  zipkinFormatterTests: {
+    test_basic_trace_and_annotations: function(test){
+      var t, a, expected;
+      t = new trace.Trace('test', {spanId: 1, traceId:5});
+      a = [new trace.Annotation('name1', 1, 'test'),
+           new trace.Annotation('name2', 2, 'test')];
+      expected = {
+        trace_id: '5',
+        span_id: '1',
+        name: 'test',
+        annotations: [
+          {
+            key: 'name1',
+            value: 1,
+            type: 'test'
+          },
+          {
+            key: 'name2',
+            value: 2,
+            type: 'test'
+          }
+        ]
+      };
+      formatters.formatForZipkin(t, a, function(error, value) {
+        console.log(value);
+      });
+    }
   }
 };
