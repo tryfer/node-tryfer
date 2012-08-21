@@ -13,16 +13,16 @@ var zipkinCore_types = require('../lib/_thrift/zipkinCore/zipkinCore_types');
 // trace, and one with an endpoint in one of the annotations
 var testcases = {
   basic_trace_and_annotations: {
-    trace: new trace.Trace('test', {spanId: 1, traceId:5}),
+    trace: new trace.Trace('test', {spanId: 10, traceId:1}),
     annotations: [new trace.Annotation.timestamp('name1', 1),
                   new trace.Annotation.string('name2', '2')]
   },
   trace_with_parentSpanId: {
-    trace: new trace.Trace('test', {parentSpanId:1, spanId: 2, traceId:5}),
+    trace: new trace.Trace('test', {parentSpanId:5, spanId: 10, traceId:1}),
     annotations: []
   },
   trace_with_annotation_with_endpoint: {
-    trace: new trace.Trace('test', {spanId: 1, traceId:5}),
+    trace: new trace.Trace('test', {spanId: 10, traceId:1}),
     annotations: [
       new trace.Annotation(
         'name1', 1, 'timestamp', (new trace.Endpoint('1.1.1.1', 5, 'service'))
@@ -66,8 +66,8 @@ module.exports = {
   restkinFormatterTests: {
     test_basic_trace_and_annotations: function(test){
       testRestkinFormatter(test, testcases.basic_trace_and_annotations, {
-        trace_id: '5',
-        span_id: '1',
+        trace_id: '0000000000000001',
+        span_id: '000000000000000a',
         name: 'test',
         annotations: [
           {
@@ -85,9 +85,9 @@ module.exports = {
     },
     test_trace_with_parentSpanId: function(test){
       testRestkinFormatter(test, testcases.trace_with_parentSpanId, {
-        trace_id: '5',
-        parent_span_id: '1',
-        span_id: '2',
+        trace_id: '0000000000000001',
+        parent_span_id: '0000000000000005',
+        span_id: '000000000000000a',
         name: 'test',
         annotations: []
       });
@@ -95,8 +95,8 @@ module.exports = {
     test_trace_with_annotation_with_endpoint: function(test) {
       testRestkinFormatter(
         test, testcases.trace_with_annotation_with_endpoint, {
-            trace_id: '5',
-            span_id: '1',
+            trace_id: '0000000000000001',
+            span_id: '000000000000000a',
             name: 'test',
             annotations: [
               {
@@ -118,8 +118,8 @@ module.exports = {
       testZipkinFormatter(
         test, testcases.basic_trace_and_annotations,
         new zipkinCore_types.Span({
-          trace_id: 5,
-          id: 1,
+          trace_id: 1,
+          id: 10,
           name: 'test',
           annotations: [ new zipkinCore_types.Annotation({
             timestamp: 1,
@@ -136,9 +136,9 @@ module.exports = {
       testZipkinFormatter(
         test, testcases.trace_with_parentSpanId,
         new zipkinCore_types.Span({
-          trace_id: 5,
-          parent_id: 1,
-          id: 2,
+          trace_id: 1,
+          parent_id: 5,
+          id: 10,
           name: 'test',
           annotations: [],
           binary_annotations: []
@@ -148,8 +148,8 @@ module.exports = {
       testZipkinFormatter(
         test, testcases.trace_with_annotation_with_endpoint,
         new zipkinCore_types.Span({
-            trace_id: 5,
-            id: 1,
+            trace_id: 1,
+            id: 10,
             name: 'test',
             annotations: [ new zipkinCore_types.Annotation({
               timestamp: 1,
