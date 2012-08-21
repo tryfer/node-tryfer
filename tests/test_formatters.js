@@ -148,18 +148,21 @@ module.exports = {
       testZipkinFormatter(
         test, testcases.trace_with_annotation_with_endpoint,
         new zipkinCore_types.Span({
-            trace_id: '5',
-            span_id: '1',
+            trace_id: 5,
+            id: 1,
             name: 'test',
             annotations: [ new zipkinCore_types.Annotation({
               timestamp: 1,
               value: 'name1',
               host: new zipkinCore_types.Endpoint({
-                ipv4: '1.1.1.1',
+                // formula is (first octet * 256^3) + (second octet * 256^2) +
+                // (third octet * 256) + (fourth octet)
+                ipv4: Math.pow(256, 3) + Math.pow(256, 2) + 256 + 1,
                 port: 5,
                 service_name: 'service'
               })
-            })]
+            })],
+            binary_annotations: []
           }));
     }
   }
