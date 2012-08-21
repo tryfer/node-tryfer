@@ -4,6 +4,7 @@ var _ = require("underscore");
 
 var formatters = require('..').formatters;
 var trace = require('..').trace;
+var zipkinCore_types = require('../lib/_thrift/zipkinCore/zipkinCore_types');
 
 module.exports = {
   restkinFormatterTests: {
@@ -84,7 +85,7 @@ module.exports = {
   zipkinFormatterTests: {
     test_basic_trace_and_annotations: function(test){
       var t, a, expected;
-      t = new trace.Trace('test', {spanId: 1, traceId:5});
+      t = new trace.Trace('span', {spanId: 1, traceId:1, parentSpanId:0});
       a = [new trace.Annotation('name1', 1, 'test'),
            new trace.Annotation('name2', 2, 'test')];
       expected = {
@@ -105,7 +106,17 @@ module.exports = {
         ]
       };
       formatters.formatForZipkin(t, a, function(error, value) {
-        console.log(value);
+        var b = new Buffer(value, "base64");
+        var tprotocol = require('../node_modules/thrift/lib/thrift/protocol');
+        var ttransport = require('../node_modules/thrift/lib/thrift/transport');
+        var trans_receiver = ttransport.TBufferedTransport.receiver(function(trans) {
+          var prot = new tprotocol.TBinaryProtocol(trans);
+          var span = new zipkinCore_types.Span();
+          span.read(prot);
+          test.deepEqual([span.id, span.trace_id, span.name], [1, 1, 'span']);
+          test.done();
+        });
+        trans_receiver(b);
       });
     }
   }
