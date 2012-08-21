@@ -65,7 +65,7 @@ var testZipkinFormatter = function (test, testcase, expected) {
 module.exports = {
   restkinFormatterTests: {
     test_basic_trace_and_annotations: function(test){
-      testRestkinFormatter(test, testcases.basic_trace_and_annotations, {
+      testRestkinFormatter(test, testcases.basic_trace_and_annotations, [{
         trace_id: '0000000000000001',
         span_id: '000000000000000a',
         name: 'test',
@@ -81,20 +81,20 @@ module.exports = {
             type: 'string'
           }
         ]
-      });
+      }]);
     },
     test_trace_with_parentSpanId: function(test){
-      testRestkinFormatter(test, testcases.trace_with_parentSpanId, {
+      testRestkinFormatter(test, testcases.trace_with_parentSpanId, [{
         trace_id: '0000000000000001',
         parent_span_id: '0000000000000005',
         span_id: '000000000000000a',
         name: 'test',
         annotations: []
-      });
+      }]);
     },
     test_trace_with_annotation_with_endpoint: function(test) {
       testRestkinFormatter(
-        test, testcases.trace_with_annotation_with_endpoint, {
+        test, testcases.trace_with_annotation_with_endpoint, [{
             trace_id: '0000000000000001',
             span_id: '000000000000000a',
             name: 'test',
@@ -110,7 +110,7 @@ module.exports = {
                 }
               }
             ]
-          });
+          }]);
     }
   },
   zipkinFormatterTests: {
