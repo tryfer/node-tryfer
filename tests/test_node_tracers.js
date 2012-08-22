@@ -126,7 +126,7 @@ module.exports = {
   test_espresso: function(test) {
     var express = require('express');
     var http = require('http');
-
+    var request = require('request');
 
     var a = express();
     var s = http.createServer(a);
@@ -142,5 +142,6 @@ module.exports = {
     });
 
     s.listen('8001');
+    request.get('http://localhost:8001');
   }
 };
