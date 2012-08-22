@@ -122,5 +122,25 @@ module.exports = {
     s.assert_category('mycategory');
     s.assert_json();
     test.done();
+  },
+  test_espresso: function(test) {
+    var express = require('express');
+    var http = require('http');
+
+
+    var a = express();
+    var s = http.createServer(a);
+
+    a.get('/', function(req, res){
+      res.end('done');
+      s.close();
+    });
+
+    s.on('close', function(){
+      console.log('le done');
+      test.done();
+    });
+
+    s.listen('8001');
   }
 };
