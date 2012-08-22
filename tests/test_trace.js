@@ -7,7 +7,7 @@ var _ = require("underscore");
 var trace = require('..').trace;
 var tracers = require('..').tracers;
 
-var MAX_ID = Math.pow(2, 31) -1;
+var MAX_ID = Math.pow(2, 63) -1;
 
 ass.isNum = function(num, message){
   ass.equal(isNaN(num), false,
