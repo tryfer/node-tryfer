@@ -1,6 +1,6 @@
 """
 Python script that produces base64 and json formats of a trace and a
-set of annotations.
+set of annotations, so they can be tested in the node port.
 """
 
 from tryfer import formatters

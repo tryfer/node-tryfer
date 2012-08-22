@@ -1,6 +1,8 @@
 /*
 Node script that produces base64 and json formats of a trace and a
-set of annotations.
+set of annotations.  Tests against the base64 and json formats produced by
+the original tryfer (by running against results that are produced by
+scripts/tryfer_format_sample.py)
 */
 
 var _ = require('underscore');
@@ -17,7 +19,7 @@ sample_annotations.forEach(function(ann) {
   ann.endpoint = endpoint;
 });
 
-var expected_base64 = "CgABAAAAAAAAAGQLAAMAAAAFdHJhY2UKAAQAAAAAAAAACgoABQAAAAAAAAAFDwAGDAAAAAEKAAEAAAAAAAAAAQsAAgAAAAZteXRpbWUMAAMIAAEBAgMEBgACH5ALAAMAAAAJbXlzZXJ2aWNlAAAPAAgMAAAAAQsAAQAAAAhteXN0cmluZwsAAgAAAAV2YWx1ZQgAAwAAAAYAAA==";
+var expected_base64 = "CgABAAAAAAAAAGQLAAMAAAAFdHJhY2UKAAQAAAAAAAAACgoABQAAAAAAAAAFDwAGDAAAAAEKAAEAAAAAAAAAAQsAAgAAAAZteXRpbWUMAAMIAAEBAgMEBgACH5ALAAMAAAAJbXlzZXJ2aWNlAAAPAAgMAAAAAQsAAQAAAAhteXN0cmluZwsAAgAAAAV2YWx1ZQgAAwAAAAYMAAQIAAEBAgMEBgACH5ALAAMAAAAJbXlzZXJ2aWNlAAAA";
 
 var expected_json = '[{"annotations": [{"host": {"service_name": "myservice", "ipv4": "1.2.3.4", "port": 8080}, "type": "timestamp", "value": 1, "key": "mytime"}, {"host": {"service_name": "myservice", "ipv4": "1.2.3.4", "port": 8080}, "type": "string", "value": "value", "key": "mystring"}], "parent_span_id": "0000000000000005", "trace_id": "0000000000000064", "name": "trace", "span_id": "000000000000000a"}]';
 
