@@ -1,3 +1,17 @@
+// Copyright 2012 Rackspace Hosting, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 var trace = require('..').trace;
 var node_tracers = require('..').node_tracers;
 
@@ -11,10 +25,13 @@ var mockKeystoneClient = {
   }
 };
 
+// Asserts (via a nodeunit test object) that the result is a base64 string
 var assert_is_base64 = function(test, string) {
   test.ok(string.search(/^([A-Za-z0-9+\/]{4})*([A-Za-z0-9+\/]{4}|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{2}==)$/) >= 0);
 };
 
+// Asserts (via a nodeunit test object) that the result is a json array - if
+// it is a string representing a json array, parses the string
 var assert_is_json_array = function(test, json) {
   if (typeof json === typeof "") {
     json = JSON.parse(json);
@@ -23,6 +40,9 @@ var assert_is_json_array = function(test, json) {
   test.ok(json.length >= 1);
 };
 
+// A fake scribe client for testing purposes - rather than send data to scribe,
+// it saves the category and message sent to it and allows assertions to be
+// made on the data (via a nodeunit test object)
 var FakeScribe = function(test) {
   var self = this;
   self.test = test;
@@ -64,6 +84,7 @@ module.exports = {
     app.post('/', function(request, response){
       test.equal(request.headers['x-auth-token'], '1');
       test.equal(request.headers['x-tenant-id'], '3');
+      test.equal(request.headers['content-type'], 'application/json');
       test.notEqual(request.headers['content-length'], '0');
       assert_is_json_array(test, request.body);
 
@@ -76,7 +97,6 @@ module.exports = {
     });
 
     server.listen(22222, 'localhost');
-
     tracer = new node_tracers.RESTkinTracer('http://localhost:22222',
                                             mockKeystoneClient);
     tracer.record(self.trace, self.annotation);
