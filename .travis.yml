@@ -5,7 +5,3 @@ node_js:
 
 before_script: npm run-script lint
 script: npm test
-
-notifications:
-  email:
-    - tomaz+travisci@tomaz.me
