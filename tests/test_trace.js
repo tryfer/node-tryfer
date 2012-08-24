@@ -39,6 +39,28 @@ var mockTracer = function(name, id, endpoint){
   };
 };
 
+// a valid trace has a traceId and a spanId that are numbers that are greater
+// than or equal to zero and less than the max id
+var assert_is_valid_trace = function(test, t) {
+  test.notEqual(t.traceId, undefined);
+  test.isNum(t.traceId);
+  test.ok(t.traceId < MAX_ID);
+  test.ok(t.traceId >= 0);
+
+  test.notEqual(t.spanId, undefined);
+  test.isNum(t.spanId);
+  test.ok(t.spanId < MAX_ID);
+  test.ok(t.spanId >= 0);
+};
+
+// generate an Annotation test
+var runAnnotationTest = function(test, ann, name, value, ann_type) {
+  test.equal(ann.name, name);
+  test.equal(ann.value, value);
+  test.equal(ann.annotationType, ann_type);
+  test.done();
+};
+
 module.exports = {
   traceTests: {
     setUp: function(cb){
@@ -51,15 +73,9 @@ module.exports = {
     },
     test_new_trace: function(test){
       var t = new trace.Trace('test_trace');
-      test.notEqual(t.traceId, undefined);
-      test.isNum(t.traceId);
-      test.ok(t.traceId < MAX_ID);
-
-      test.notEqual(t.spanId, undefined);
-      test.isNum(t.spanId);
-      test.ok(t.spanId < MAX_ID);
-
+      test.equal(t.name, 'test_trace');
       test.equal(t.parentSpanId, undefined);
+      assert_is_valid_trace(test, t);
       test.done();
     },
     test_trace_child: function(test){
@@ -92,6 +108,84 @@ module.exports = {
       test.deepEqual(tracer._calls.record[0], [t,a]);
       test.deepEqual(a.endpoint, e);
       test.done();
+    },
+    test_toHeaders_no_parent_span: function(test) {
+      var t = new trace.Trace('GET', {traceId: 1, spanId: 10});
+      test.deepEqual(t.toHeaders(), {
+        'X-B3-TraceId': '0000000000000001',
+        'X-B3-SpanId': '000000000000000a'
+      });
+      test.done();
+    },
+    test_toHeaders_parent_span: function(test) {
+      var t = new trace.Trace('GET', {traceId: 1, spanId: 10, parentSpanId: 5});
+      test.deepEqual(t.toHeaders(), {
+        'X-B3-TraceId': '0000000000000001',
+        'X-B3-SpanId': '000000000000000a',
+        'X-B3-ParentSpanId': '0000000000000005'
+      });
+      test.done();
+    },
+    test_toHeaders_add_to_existing_header: function(test) {
+      var t = new trace.Trace('GET', {traceId: 1, spanId: 10});
+      var headers = {'Content-Type': 'application/json'};
+      test.deepEqual(t.toHeaders(headers), {
+        'X-B3-TraceId': '0000000000000001',
+        'X-B3-SpanId': '000000000000000a',
+        'Content-Type': 'application/json'
+      });
+      test.done();
+    },
+    test_fromRequest_no_headers: function(test) {
+      var t = new trace.Trace.fromRequest('GET');
+      test.equal(t.name, 'GET');
+      assert_is_valid_trace(test, t);
+      test.done();
+    },
+    test_fromRequest_headers_with_only_trace_id: function(test) {
+      // the generated ID can never be equal to MAX_ID, only less than
+      // therefore if the trace ID gets set it will not be a valid trace
+      var t = new trace.Trace.fromRequest(
+        'GET', {'X-B3-TraceId': MAX_ID.toString(16)});
+
+      test.equal(t.name, 'GET');
+      assert_is_valid_trace(test, t);
+      test.done();
+    },
+    test_fromRequest_headers_with_only_span_id: function(test) {
+      // the generated ID can never be equal to MAX_ID, only less than
+      // therefore if the trace ID gets set it will not be a valid trace
+      var t = new trace.Trace.fromRequest(
+        'GET', {'X-B3-SpanId': MAX_ID.toString(16)});
+
+      test.equal(t.name, 'GET');
+      assert_is_valid_trace(test, t);
+      test.done();
+    },
+    test_fromRequest_headers_without_parent_id: function(test) {
+      var t = new trace.Trace.fromRequest('POST', {
+        'X-B3-TraceId': '000000000000000a',
+        'X-B3-SpanId': '000000000000000a'
+      });
+
+      test.equal(t.name, 'POST');
+      test.equal(t.traceId, 10);
+      test.equal(t.spanId, 10);
+      test.equal(t.parentSpanId, undefined);
+      test.done();
+    },
+    test_fromRequest_headers_with_parent_id: function(test) {
+      var t = new trace.Trace.fromRequest('POST', {
+        'X-B3-TraceId': '0000000000000001',
+        'X-B3-SpanId': '000000000000000a',
+        'X-B3-ParentSpanId': '0000000000000005'
+      });
+
+      test.equal(t.name, 'POST');
+      test.equal(t.traceId, 1);
+      test.equal(t.spanId, 10);
+      test.equal(t.parentSpanId, 5);
+      test.done();
     }
   },
   annotationTests: {
@@ -109,46 +203,33 @@ module.exports = {
       cb();
     },
     test_timestamp: function(test) {
-      var a = trace.Annotation.timestamp('test');
-      test.equal(a.name, 'test');
-      test.equal(a.value, 1000000);
-      test.equal(a.annotationType, 'timestamp');
-      test.done();
+      runAnnotationTest(test, trace.Annotation.timestamp('test'), 'test',
+                        1000000, 'timestamp');
     },
     test_client_send: function(test) {
-      var a = trace.Annotation.clientSend();
-      test.equal(a.value, 1000000);
-      test.equal(a.name, 'cs');
-      test.equal(a.annotationType, 'timestamp');
-      test.done();
+      runAnnotationTest(test, trace.Annotation.clientSend(), 'cs', 1000000,
+                        'timestamp');
     },
     test_client_recv: function(test) {
-      var a = trace.Annotation.clientRecv();
-      test.equal(a.value, 1000000);
-      test.equal(a.name, 'cr');
-      test.equal(a.annotationType, 'timestamp');
-      test.done();
+      runAnnotationTest(test, trace.Annotation.clientRecv(), 'cr', 1000000,
+                        'timestamp');
     },
     test_server_send: function(test) {
-      var a = trace.Annotation.serverSend();
-      test.equal(a.value, 1000000);
-      test.equal(a.name, 'ss');
-      test.equal(a.annotationType, 'timestamp');
-      test.done();
+      runAnnotationTest(test, trace.Annotation.serverSend(), 'ss', 1000000,
+                        'timestamp');
     },
     test_server_recv: function(test) {
-      var a = trace.Annotation.serverRecv();
-      test.equal(a.value, 1000000);
-      test.equal(a.name, 'sr');
-      test.equal(a.annotationType, 'timestamp');
-      test.done();
+      runAnnotationTest(test, trace.Annotation.serverRecv(), 'sr', 1000000,
+                        'timestamp');
     },
     test_string: function(test) {
-      var a = trace.Annotation.string('myname', 'ispie');
-      test.equal(a.value, 'ispie');
-      test.equal(a.name, 'myname');
-      test.equal(a.annotationType, 'string');
-      test.done();
+      runAnnotationTest(test, trace.Annotation.string('myname', 'ispi'),
+                        'myname', 'ispi', 'string');
+    },
+    test_uri: function(test) {
+      var uri = 'http://example.com';
+      runAnnotationTest(test, trace.Annotation.uri(uri), 'http.uri', uri,
+                        'string');
     }
   }
 };
