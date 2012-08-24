@@ -146,7 +146,7 @@ module.exports = {
       // the generated ID can never be equal to MAX_ID, only less than
       // therefore if the trace ID gets set it will not be a valid trace
       var t = new trace.Trace.fromRequest(
-        'GET', {'X-B3-TraceId': MAX_ID.toString(16)});
+        'GET', {'x-b3-traceid': MAX_ID.toString(16)});
 
       test.equal(t.name, 'GET');
       assert_is_valid_trace(test, t);
@@ -156,7 +156,7 @@ module.exports = {
       // the generated ID can never be equal to MAX_ID, only less than
       // therefore if the trace ID gets set it will not be a valid trace
       var t = new trace.Trace.fromRequest(
-        'GET', {'X-B3-SpanId': MAX_ID.toString(16)});
+        'GET', {'x-b3-spanid': MAX_ID.toString(16)});
 
       test.equal(t.name, 'GET');
       assert_is_valid_trace(test, t);
@@ -164,8 +164,8 @@ module.exports = {
     },
     test_fromRequest_headers_without_parent_id: function(test) {
       var t = new trace.Trace.fromRequest('POST', {
-        'X-B3-TraceId': '000000000000000a',
-        'X-B3-SpanId': '000000000000000a'
+        'x-b3-traceid': '000000000000000a',
+        'x-b3-spanid': '000000000000000a'
       });
 
       test.equal(t.name, 'POST');
@@ -176,9 +176,9 @@ module.exports = {
     },
     test_fromRequest_headers_with_parent_id: function(test) {
       var t = new trace.Trace.fromRequest('POST', {
-        'X-B3-TraceId': '0000000000000001',
-        'X-B3-SpanId': '000000000000000a',
-        'X-B3-ParentSpanId': '0000000000000005'
+        'x-b3-traceid': '0000000000000001',
+        'x-b3-spanid': '000000000000000a',
+        'x-b3-parentspanid': '0000000000000005'
       });
 
       test.equal(t.name, 'POST');
