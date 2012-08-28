@@ -137,35 +137,20 @@ module.exports = {
       test.done();
     },
     test_fromRequest_no_headers: function(test) {
-      var t = new trace.Trace.fromRequest('GET');
-      test.equal(t.name, 'GET');
-      assert_is_valid_trace(test, t);
-      test.done();
-    },
-    test_fromRequest_headers_with_only_trace_id: function(test) {
-      // the generated ID can never be equal to MAX_ID, only less than
-      // therefore if the trace ID gets set it will not be a valid trace
-      var t = new trace.Trace.fromRequest(
-        'GET', {'x-b3-traceid': MAX_ID.toString(16)});
-
-      test.equal(t.name, 'GET');
-      assert_is_valid_trace(test, t);
-      test.done();
-    },
-    test_fromRequest_headers_with_only_span_id: function(test) {
-      // the generated ID can never be equal to MAX_ID, only less than
-      // therefore if the trace ID gets set it will not be a valid trace
-      var t = new trace.Trace.fromRequest(
-        'GET', {'x-b3-spanid': MAX_ID.toString(16)});
-
+      // tests to make sure that without header ids, a valid trace is
+      // still produced
+      var t = new trace.Trace.fromRequest({method: 'GET', headers: {}});
       test.equal(t.name, 'GET');
       assert_is_valid_trace(test, t);
       test.done();
     },
     test_fromRequest_headers_without_parent_id: function(test) {
-      var t = new trace.Trace.fromRequest('POST', {
-        'x-b3-traceid': '000000000000000a',
-        'x-b3-spanid': '000000000000000a'
+      var t = new trace.Trace.fromRequest({
+        method: 'POST',
+        headers: {
+          'x-b3-traceid': '000000000000000a',
+          'x-b3-spanid': '000000000000000a'
+        }
       });
 
       test.equal(t.name, 'POST');
@@ -175,16 +160,46 @@ module.exports = {
       test.done();
     },
     test_fromRequest_headers_with_parent_id: function(test) {
-      var t = new trace.Trace.fromRequest('POST', {
-        'x-b3-traceid': '0000000000000001',
-        'x-b3-spanid': '000000000000000a',
-        'x-b3-parentspanid': '0000000000000005'
+      var t = new trace.Trace.fromRequest({
+        method: 'POST',
+        headers: {
+          'x-b3-traceid': '0000000000000001',
+          'x-b3-spanid': '000000000000000a',
+          'x-b3-parentspanid': '0000000000000005'
+        }
       });
 
       test.equal(t.name, 'POST');
       test.equal(t.traceId, 1);
       test.equal(t.spanId, 10);
       test.equal(t.parentSpanId, 5);
+      test.done();
+    },
+    test_fromRequest_default_endpoint: function(test) {
+      var t = new trace.Trace.fromRequest({method: 'GET', headers: {}});
+      test.equal(t.endpoint.ipv4, '127.0.0.1');
+      test.equal(t.endpoint.port, 80);
+      test.equal(t.endpoint.serviceName, "http");
+      test.done();
+    },
+    test_fromRequest_endpoint_from_address_info: function(test) {
+      var t = new trace.Trace.fromRequest({
+        method: 'GET',
+        headers: {},
+        socket: {
+          address: function() {
+            return {family: 2, port: 8888, address: '1.2.3.4'};
+          }
+        }
+      });
+      test.equal(t.endpoint.ipv4, '1.2.3.4');
+      test.equal(t.endpoint.port, 8888);
+      test.done();
+    },
+    test_fromRequest_endpoint_with_servicename: function(test) {
+      var t = new trace.Trace.fromRequest(
+        {method: 'GET', headers: {}}, 'this_is_a_service');
+      test.equal(t.endpoint.serviceName, "this_is_a_service");
       test.done();
     }
   },
