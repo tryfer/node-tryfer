@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+// USAGE: node tracing_server.js
+// Sample server code showing how to make a server that supports tracing
+// HTTP requests from clients
+
 var express = require('express');
 
 var trace = require('..').trace;
@@ -20,15 +25,13 @@ var tracers = require('..').tracers;
 // DebugTracer prints traces to stdout
 tracers.pushTracer(new tracers.DebugTracer(process.stdout));
 
-// Create an express server
 var app = express();
 
 app.get('/', function(request, response) {
   // Create a trace from the request headers. The trace used for http
   // requests, by Tryfer convention, should be named by the request method
-  var t = trace.Trace.fromRequest(request.method, request.headers);
-
-  // Record the server receive annotation
+  var t = trace.Trace.fromRequest(request, 'example-http-server');
+  // Record the server receive annotation as soon as possible
   t.record(trace.Annotation.serverRecv());
 
   // Other annotations can also be recorded

@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+// USAGE: node tracing_client.js [HTTP Method] [URL]
+// Sample client code showing how to make an HTTP request to a server that
+// supports tracing (one that uses node-tryfer, tryfer, or finagle)
+
 var request = require('request');
 
 var trace = require('..').trace;
