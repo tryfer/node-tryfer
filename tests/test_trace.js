@@ -136,22 +136,20 @@ module.exports = {
       });
       test.done();
     },
-    test_fromRequest_no_headers: function(test) {
+    test_fromHeaders_emtpy_headers: function(test) {
       // tests to make sure that without header ids, a valid trace is
       // still produced
-      var t = new trace.Trace.fromRequest({method: 'GET', headers: {}});
+      var t = trace.Trace.fromHeaders('GET', {});
       test.equal(t.name, 'GET');
       assert_is_valid_trace(test, t);
       test.done();
     },
-    test_fromRequest_headers_without_parent_id: function(test) {
-      var t = new trace.Trace.fromRequest({
-        method: 'POST',
-        headers: {
+    test_fromHeaders_without_parent_id: function(test) {
+      var t = trace.Trace.fromHeaders('POST',
+        {
           'x-b3-traceid': '000000000000000a',
           'x-b3-spanid': '000000000000000a'
-        }
-      });
+        });
 
       test.equal(t.name, 'POST');
       test.equal(t.traceId, 10);
@@ -159,15 +157,13 @@ module.exports = {
       test.equal(t.parentSpanId, undefined);
       test.done();
     },
-    test_fromRequest_headers_with_parent_id: function(test) {
-      var t = new trace.Trace.fromRequest({
-        method: 'POST',
-        headers: {
+    test_fromHeaders_with_parent_id: function(test) {
+      var t = trace.Trace.fromHeaders('POST',
+        {
           'x-b3-traceid': '0000000000000001',
           'x-b3-spanid': '000000000000000a',
           'x-b3-parentspanid': '0000000000000005'
-        }
-      });
+        });
 
       test.equal(t.name, 'POST');
       test.equal(t.traceId, 1);
@@ -175,8 +171,24 @@ module.exports = {
       test.equal(t.parentSpanId, 5);
       test.done();
     },
+    test_fromRequest_calls_fromHeaders: function(test) {
+      var orig = trace.Trace.fromHeaders;
+      var test_headers = {'hat': 'cat'};
+      trace.Trace.fromHeaders = function(traceName, headers) {
+        try {
+          test.equal(traceName, 'POST');
+          test.equal(headers, test_headers); // should be the same reference
+        } finally {
+          // always clean up
+          trace.Trace.fromHeaders = orig;
+        }
+        return trace.Trace.fromHeaders(traceName, headers);
+      };
+      trace.Trace.fromRequest({method: 'POST', headers: test_headers});
+      test.done();
+    },
     test_fromRequest_default_endpoint: function(test) {
-      var t = new trace.Trace.fromRequest({method: 'GET', headers: {}});
+      var t = trace.Trace.fromRequest({method: 'GET', headers: {}});
       test.equal(t.endpoint.ipv4, '127.0.0.1');
       test.equal(t.endpoint.port, 80);
       test.equal(t.endpoint.serviceName, "http");
