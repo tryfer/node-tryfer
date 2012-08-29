@@ -28,8 +28,12 @@ tracers.pushTracer(new tracers.DebugTracer(process.stdout));
 var app = express();
 
 app.get('/', function(request, response) {
-  // Create a trace from the request headers. The trace used for http
-  // requests, by Tryfer convention, should be named by the request method
+  // Create a trace from the request.  Alternately,
+  // {trace.Trace.fromHeaders} could also be used (called with the request
+  // method name and the request headers, because by Tryfer convention, the
+  // trace used for http requests should be named by the request method)
+  // but {trace.Trace.fromRequest} also adds an endpoint based on the socket
+  // on the request.
   var t = trace.Trace.fromRequest(request, 'example-http-server');
   // Record the server receive annotation as soon as possible
   t.record(trace.Annotation.serverRecv());
