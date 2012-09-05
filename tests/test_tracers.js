@@ -1,5 +1,6 @@
 var tracers = require('..').tracers;
 var trace = require('..').trace;
+var formatters = require('..').formatters;
 
 module.exports = {
   globalFunctions: {
@@ -42,7 +43,7 @@ module.exports = {
   debugTracer: {
     test_writes_to_stream: function(test){
       // setup
-      var written = "", debug_tracer, t, a;
+      var written = "", debug_tracer, t, a, expected;
       var mock_stream = {
         write: function(data) { written  += data; }
       };
@@ -52,10 +53,12 @@ module.exports = {
       a = new trace.Annotation.timestamp('mytime', 100);
       debug_tracer.record(t, a);
 
-      test.equal(written,
-                 "---\nAdding annotation for trace: 1:1:2:test\n\t" +
-                 "mytime = 100:timestamp\n");
-      test.done();
+      formatters.formatForRestkin(t, [a], function(err, json) {
+        test.equal(written,
+                   '--- Trace ---\n' + JSON.stringify(
+                      JSON.parse(json), null, 2) + '\n');
+        test.done();
+      });
     }
   },
   endAnnotationTracer: {
