@@ -114,7 +114,7 @@ module.exports = {
     tracer1.record(self.trace, self.annotation);
     tracer2.record(self.trace, self.annotation);
   },
-  test_restkin_tracer_server_: function(test) {
+  test_restkin_tracer_server_connection_to_server_refused: function(test) {
     var tracer;
 
     tracer = new node_tracers.RESTkinTracer('http://localhost:1898/',
