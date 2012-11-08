@@ -20,7 +20,7 @@ var http = require('http');
 var util = require('util');
 
 var mockKeystoneClient = {
-  getTenantIdAndToken: function(cb) {
+  getTenantIdAndToken: function(options, cb) {
     cb('1', 2, '3');
   }
 };
