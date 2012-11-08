@@ -5,25 +5,25 @@
   "version": "0.1.0",
   "main": "./index",
   "contributors": [
-        {
-            "name": "Ying Li",
-            "email": "ying.li@rackspace.com",
-            "url": "https://github.com/cyli"
-        },
-        {
-            "name": "Matt Kaniaris",
-            "email": "matthew.kaniaris@rackspace.com",
-            "url": "http://kansface.com"
-        },
-        {
-            "name": "Tomaz Muraus",
-            "email": "tomaz.muraus@rackspace.com",
-            "url": "http://www.tomaz.me"
-        }
+      {
+        "name": "Ying Li",
+        "email": "ying.li@rackspace.com",
+        "url": "https://github.com/cyli"
+      },
+      {
+        "name": "Matt Kaniaris",
+        "email": "matthew.kaniaris@rackspace.com",
+        "url": "http://kansface.com"
+      },
+      {
+        "name": "Tomaz Muraus",
+        "email": "tomaz.muraus@rackspace.com",
+        "url": "http://www.tomaz.me"
+      }
   ],
   "dependencies": {
-    "thrift": "",
-    "request": ""
+    "thrift": "0.7.0",
+    "request": "2.11.4"
   },
   "devDependencies": {
     "express": "",
@@ -33,7 +33,7 @@
     "jshint": ""
   },
   "optionalDependencies": {
-    "keystone-client": "",
+    "keystone-client": ">= 0.3.0",
     "scribe": ""
   },
   "engines": {
