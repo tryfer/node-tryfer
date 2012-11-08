@@ -81,7 +81,7 @@ module.exports = {
 
     app.use(express.bodyParser());
 
-    app.post('/', function(request, response){
+    app.post('/3/trace', function(request, response){
       test.equal(request.headers['x-auth-token'], '1');
       test.equal(request.headers['x-tenant-id'], '3');
       test.equal(request.headers['content-type'], 'application/json');

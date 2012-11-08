@@ -9,6 +9,7 @@
     "request": ""
   },
   "devDependencies": {
+    "express": "",
     "nodeunit": "",
     "underscore": "1.3.x",
     "espresso": "",
