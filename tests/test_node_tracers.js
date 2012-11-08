@@ -77,11 +77,13 @@ module.exports = {
     var self = this;
     var app = express();
     var server = http.createServer(app);
-    var tracer;
+    var tracer1, tracer2;
+    var i = 0;
 
     app.use(express.bodyParser());
 
-    app.post('/3/trace', function(request, response){
+    app.post('/3/trace', function(request, response) {
+      i++;
       test.equal(request.headers['x-auth-token'], '1');
       test.equal(request.headers['x-tenant-id'], '3');
       test.equal(request.headers['content-type'], 'application/json');
@@ -89,7 +91,10 @@ module.exports = {
       assert_is_json_array(test, request.body);
 
       response.end('done');
-      server.close();
+
+      if (i === 2) {
+        server.close();
+      }
     });
 
     server.on('close', function(){
@@ -97,9 +102,17 @@ module.exports = {
     });
 
     server.listen(22222, 'localhost');
-    tracer = new node_tracers.RESTkinTracer('http://localhost:22222',
-                                            mockKeystoneClient);
-    tracer.record(self.trace, self.annotation);
+
+    // Valid URL
+    tracer1 = new node_tracers.RESTkinTracer('http://localhost:22222',
+                                             mockKeystoneClient);
+
+    // Valid URL with trailing slash
+    tracer2 = new node_tracers.RESTkinTracer('http://localhost:22222/',
+                                             mockKeystoneClient);
+
+    tracer1.record(self.trace, self.annotation);
+    tracer2.record(self.trace, self.annotation);
   },
   test_zipkin_tracer_default_category: function(test){
     var self = this;
