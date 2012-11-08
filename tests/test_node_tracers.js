@@ -114,6 +114,15 @@ module.exports = {
     tracer1.record(self.trace, self.annotation);
     tracer2.record(self.trace, self.annotation);
   },
+  test_restkin_tracer_server_: function(test) {
+    var tracer;
+
+    tracer = new node_tracers.RESTkinTracer('http://localhost:1898/',
+                                            mockKeystoneClient);
+
+    tracer.record(this.trace, this.annotation);
+    test.done();
+  },
   test_zipkin_tracer_default_category: function(test){
     var self = this;
     var s = new FakeScribe(test);
