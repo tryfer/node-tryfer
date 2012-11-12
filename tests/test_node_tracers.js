@@ -155,13 +155,56 @@ module.exports = {
 
     server.listen(22222, 'localhost');
 
-    options = {'batchMode': true, 'batchSendAfterMsgs': 15}
+    options = {'batchMode': true, 'batchSendAfterMsgs': 15};
     tracer = new node_tracers.RESTkinTracer('http://localhost:22222',
                                             mockKeystoneClient, options);
 
     for (i = 0; i < 15; i++) {
       tracer.record(self.trace, self.annotation);
     }
+  },
+  test_restkin_tracer_batch_mode_send_after_interval: function(test){
+    var self = this;
+    var app = express();
+    var server = http.createServer(app);
+    var tracer;
+    var options;
+
+    app.use(express.bodyParser());
+
+    app.post('/3/trace', function(request, response) {
+      var body = request.body;
+
+      test.equal(request.headers['x-auth-token'], '1');
+      test.equal(request.headers['x-tenant-id'], '3');
+      test.equal(request.headers['content-type'], 'application/json');
+      test.notEqual(request.headers['content-length'], '0');
+
+      assert_is_json_array(test, body);
+      test.equal(body.length, 3);
+
+      response.end('done');
+      server.close();
+    });
+
+    server.on('close', function(){
+      test.done();
+    });
+
+    server.listen(22222, 'localhost');
+
+    options = {'batchMode': true, 'batchSendAfterMsgs': 15,
+               'batchSendAfterInterval': 1000};
+    tracer = new node_tracers.RESTkinTracer('http://localhost:22222',
+                                            mockKeystoneClient, options);
+
+    tracer.record(self.trace, self.annotation);
+    tracer.record(self.trace, self.annotation);
+
+    setTimeout(function() {
+      // This should trigger sending of the traces
+      tracer.record(self.trace, self.annotation);
+    }, 1000);
   },
   test_zipkin_tracer_default_category: function(test){
     var self = this;
