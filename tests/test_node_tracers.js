@@ -106,11 +106,11 @@ module.exports = {
     server.listen(22222, 'localhost');
 
     // Valid URL
-    tracer1 = new node_tracers.RESTkinTracer('http://localhost:22222',
+    tracer1 = new node_tracers.RawRESTkinHTTPTracer('http://localhost:22222',
                                              mockKeystoneClient);
 
     // Valid URL with trailing slash
-    tracer2 = new node_tracers.RESTkinTracer('http://localhost:22222/',
+    tracer2 = new node_tracers.RawRESTkinHTTPTracer('http://localhost:22222/',
                                              mockKeystoneClient);
 
     tracer1.record(self.trace, self.annotation);
@@ -119,7 +119,7 @@ module.exports = {
   test_restkin_tracer_server_connection_to_server_refused: function(test) {
     var tracer;
 
-    tracer = new node_tracers.RESTkinTracer('http://localhost:1898/',
+    tracer = new node_tracers.RawRESTkinHTTPTracer('http://localhost:1898/',
                                             mockKeystoneClient);
 
     tracer.record(this.trace, this.annotation);
@@ -156,7 +156,7 @@ module.exports = {
     server.listen(22222, 'localhost');
 
     options = {'batchMode': true, 'batchSendAfterMsgs': 15};
-    tracer = new node_tracers.RESTkinTracer('http://localhost:22222',
+    tracer = new node_tracers.RawRESTkinHTTPTracer('http://localhost:22222',
                                             mockKeystoneClient, options);
 
     for (i = 0; i < 15; i++) {
@@ -195,7 +195,7 @@ module.exports = {
 
     options = {'batchMode': true, 'batchSendAfterMsgs': 15,
                'batchSendAfterInterval': 1000};
-    tracer = new node_tracers.RESTkinTracer('http://localhost:22222',
+    tracer = new node_tracers.RawRESTkinHTTPTracer('http://localhost:22222',
                                             mockKeystoneClient, options);
 
     tracer.record(self.trace, self.annotation);
@@ -229,7 +229,7 @@ module.exports = {
   test_restkin_scribe_tracer_default_category: function(test){
     var self = this;
     var s = new FakeScribe(test);
-    var t = new node_tracers.RESTkinScribeTracer(s);
+    var t = new node_tracers.RawRESTkinScribeTracer(s);
     t.record(self.trace, self.annotation);
     s.assert_sent();
     s.assert_category('restkin');
@@ -239,7 +239,7 @@ module.exports = {
   test_restkin_scribe_tracer_provided_category: function(test){
     var self = this;
     var s = new FakeScribe(test);
-    var t = new node_tracers.RESTkinScribeTracer(s, 'mycategory');
+    var t = new node_tracers.RawRESTkinScribeTracer(s, 'mycategory');
     t.record(self.trace, self.annotation);
     s.assert_sent();
     s.assert_category('mycategory');
