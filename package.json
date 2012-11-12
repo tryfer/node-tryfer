@@ -23,6 +23,7 @@
   ],
   "dependencies": {
     "thrift": "0.7.0",
+    "async": "0.1.22",
     "request": "2.11.4"
   },
   "devDependencies": {
