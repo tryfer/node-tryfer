@@ -204,7 +204,7 @@ module.exports = {
     setTimeout(function() {
       // This should trigger sending of the traces
       tracer.record(self.trace, self.annotation);
-    }, 1000);
+    }, 1500);
   },
   test_zipkin_tracer_default_category: function(test){
     var self = this;
