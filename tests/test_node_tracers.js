@@ -68,12 +68,13 @@ var FakeScribe = function(test) {
 
 module.exports = {
   setUp: function(cb) {
-    var self = this;
-    self.trace = new trace.Trace('clientRecv');
-    self.annotation = trace.Annotation.clientRecv(2);
+    this.trace = new trace.Trace('clientRecv');
+    this.annotation = trace.Annotation.clientRecv(2);
+    this.traces = [[this.trace, [this.annotation]]];
     cb();
   },
-  test_restkin_tracer: function(test){
+
+  test_raw_restkin_tracer: function(test){
     var self = this;
     var app = express();
     var server = http.createServer(app);
@@ -113,19 +114,21 @@ module.exports = {
     tracer2 = new node_tracers.RawRESTkinHTTPTracer('http://localhost:22222/',
                                              mockKeystoneClient);
 
-    tracer1.record(self.trace, self.annotation);
-    tracer2.record(self.trace, self.annotation);
+    tracer1.record(self.traces);
+    tracer2.record(self.traces);
   },
-  test_restkin_tracer_server_connection_to_server_refused: function(test) {
+
+  test_raw_restkin_tracer_server_connection_to_server_refused: function(test) {
     var tracer;
 
     tracer = new node_tracers.RawRESTkinHTTPTracer('http://localhost:1898/',
                                             mockKeystoneClient);
 
-    tracer.record(this.trace, this.annotation);
+    tracer.record(this.traces);
     test.done();
   },
-  test_restkin_tracer_batch_mode_send_after_msgs: function(test){
+
+  test_restkin_tracer_maxTraces: function(test) {
     var self = this;
     var app = express();
     var server = http.createServer(app);
@@ -146,6 +149,7 @@ module.exports = {
       test.equal(body.length, 15);
 
       response.end('done');
+      tracer.stop();
       server.close();
     });
 
@@ -155,20 +159,22 @@ module.exports = {
 
     server.listen(22222, 'localhost');
 
-    options = {'batchMode': true, 'batchSendAfterMsgs': 15};
-    tracer = new node_tracers.RawRESTkinHTTPTracer('http://localhost:22222',
+    options = {'maxTraces': 15};
+    tracer = new node_tracers.RESTkinHTTPTracer('http://localhost:22222',
                                             mockKeystoneClient, options);
 
     for (i = 0; i < 15; i++) {
-      tracer.record(self.trace, self.annotation);
+      tracer.record(this.traces);
     }
   },
-  test_restkin_tracer_batch_mode_send_after_interval: function(test){
+
+  test_restkin_tracer_maxIdleTime: function(test) {
     var self = this;
     var app = express();
     var server = http.createServer(app);
     var tracer;
     var options;
+    var now = Date.now();
 
     app.use(express.bodyParser());
 
@@ -181,10 +187,12 @@ module.exports = {
       test.notEqual(request.headers['content-length'], '0');
 
       assert_is_json_array(test, body);
-      test.equal(body.length, 3);
+      test.equal(body.length, 2);
+      test.ok(now + 1000 <= Date.now())
 
       response.end('done');
       server.close();
+      tracer.stop();
     });
 
     server.on('close', function(){
@@ -193,57 +201,57 @@ module.exports = {
 
     server.listen(22222, 'localhost');
 
-    options = {'batchMode': true, 'batchSendAfterMsgs': 15,
-               'batchSendAfterInterval': 1000};
-    tracer = new node_tracers.RawRESTkinHTTPTracer('http://localhost:22222',
-                                            mockKeystoneClient, options);
+    options = {'maxIdleTime': 1};
+    tracer = new node_tracers.RESTkinHTTPTracer('http://localhost:22222',
+                                                mockKeystoneClient, options);
 
-    tracer.record(self.trace, self.annotation);
-    tracer.record(self.trace, self.annotation);
-
-    setTimeout(function() {
-      // This should trigger sending of the traces
-      tracer.record(self.trace, self.annotation);
-    }, 1500);
+    tracer.record(this.traces);
+    tracer.record(this.traces);
   },
+
   test_zipkin_tracer_default_category: function(test){
-    var self = this;
     var s = new FakeScribe(test);
-    var t = new node_tracers.ZipkinTracer(s);
-    t.record(self.trace, self.annotation);
+    var t = new node_tracers.RawZipkinTracer(s);
+    t.record(this.traces);
     s.assert_sent();
     s.assert_category('zipkin');
     s.assert_base64();
     test.done();
   },
+
   test_zipkin_tracer_provided_category: function(test){
-    var self = this;
     var s = new FakeScribe(test);
-    var t = new node_tracers.ZipkinTracer(s, 'mycategory');
-    t.record(self.trace, self.annotation);
+    var t = new node_tracers.RawZipkinTracer(s, 'mycategory');
+    t.record(this.traces);
     s.assert_sent();
     s.assert_category('mycategory');
     s.assert_base64();
     test.done();
   },
+
   test_restkin_scribe_tracer_default_category: function(test){
-    var self = this;
     var s = new FakeScribe(test);
     var t = new node_tracers.RawRESTkinScribeTracer(s);
-    t.record(self.trace, self.annotation);
-    s.assert_sent();
-    s.assert_category('restkin');
-    s.assert_json();
-    test.done();
+    t.record(this.traces);
+
+    setTimeout(function() {
+      s.assert_sent();
+      s.assert_category('restkin');
+      s.assert_json();
+      test.done();
+    }, 100);
   },
+
   test_restkin_scribe_tracer_provided_category: function(test){
-    var self = this;
     var s = new FakeScribe(test);
     var t = new node_tracers.RawRESTkinScribeTracer(s, 'mycategory');
-    t.record(self.trace, self.annotation);
-    s.assert_sent();
-    s.assert_category('mycategory');
-    s.assert_json();
-    test.done();
+    t.record(this.traces);
+
+    setTimeout(function() {
+      s.assert_sent();
+      s.assert_category('mycategory');
+      s.assert_json();
+      test.done();
+    }, 100);
   }
 };

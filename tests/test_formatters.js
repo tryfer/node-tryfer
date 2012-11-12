@@ -14,7 +14,7 @@
 
 var util = require('util');
 
-var _ = require("underscore");
+var _ = require('underscore');
 var tprotocol = require('../node_modules/thrift/lib/thrift/protocol');
 var ttransport = require('../node_modules/thrift/lib/thrift/transport');
 
