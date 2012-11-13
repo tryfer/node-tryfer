@@ -213,20 +213,26 @@ module.exports = {
     var s = new FakeScribe(test);
     var t = new node_tracers.RawZipkinTracer(s);
     t.record(this.traces);
-    s.assert_sent();
-    s.assert_category('zipkin');
-    s.assert_base64();
-    test.done();
+
+    setTimeout(function() {
+      s.assert_sent();
+      s.assert_category('zipkin');
+      s.assert_base64();
+      test.done();
+    }, 100);
   },
 
   test_zipkin_tracer_provided_category: function(test){
     var s = new FakeScribe(test);
     var t = new node_tracers.RawZipkinTracer(s, 'mycategory');
     t.record(this.traces);
-    s.assert_sent();
-    s.assert_category('mycategory');
-    s.assert_base64();
-    test.done();
+
+    setTimeout(function() {
+      s.assert_sent();
+      s.assert_category('mycategory');
+      s.assert_base64();
+      test.done();
+    }, 100);
   },
 
   test_restkin_scribe_tracer_default_category: function(test){
