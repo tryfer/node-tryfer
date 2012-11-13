@@ -48,7 +48,7 @@ module.exports = {
   debugTracer: {
     test_writes_to_stream: function(test){
       // setup
-      var written = "", debug_tracer, t, a, expected;
+      var written = '', debug_tracer, t, a, traces;
       var mock_stream = {
         write: function(data) { written  += data; }
       };
@@ -56,12 +56,13 @@ module.exports = {
       debug_tracer = new tracers.DebugTracer(mock_stream);
       t = new trace.Trace('test', {traceId: 1, spanId:2, parentSpanId:1});
       a = new trace.Annotation.timestamp('mytime', 100);
-      debug_tracer.record([[t, [a]]]);
+      traces = [[t, [a]]];
+      debug_tracer.record(traces);
 
-      formatters.formatTracesForRestkin([[t, [a]]], function(err, json) {
-        test.equal(written,
-                   '--- Trace ---\n' + JSON.stringify(
-                      JSON.parse(json), null, 2) + '\n');
+      formatters.formatForRestkin(t, [a], function(err, json) {
+        var expected = '--- Trace ---\n' + JSON.stringify(
+                      JSON.parse(json), null, 2) + '\n';
+        test.equal(written, expected);
         test.done();
       });
     }

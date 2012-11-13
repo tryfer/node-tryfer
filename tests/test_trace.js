@@ -93,7 +93,7 @@ module.exports = {
       });
       a = trace.Annotation.clientSend(0);
       t.record(a);
-      test.deepEqual(tracer._calls.record[0], [t,a]);
+      test.deepEqual(tracer._calls.record[0], [[[t, [a]]]]);
       test.done();
     },
     test_record_sets_annotation_endpoint: function(test){
@@ -105,7 +105,7 @@ module.exports = {
       t.setEndpoint(e);
       a = new trace.Annotation.clientSend(1);
       t.record(a);
-      test.deepEqual(tracer._calls.record[0], [t,a]);
+      test.deepEqual(tracer._calls.record[0], [[[t, [a]]]]);
       test.deepEqual(a.endpoint, e);
       test.done();
     },
