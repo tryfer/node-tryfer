@@ -168,7 +168,7 @@ module.exports = {
     }
   },
 
-  test_restkin_tracer_maxIdleTime: function(test) {
+  test_restkin_tracer_sendInterval: function(test) {
     var self = this;
     var app = express();
     var server = http.createServer(app);
@@ -201,7 +201,7 @@ module.exports = {
 
     server.listen(22222, 'localhost');
 
-    options = {'maxIdleTime': 1};
+    options = {'sendInterval': 1};
     tracer = new node_tracers.RESTkinHTTPTracer('http://localhost:22222',
                                                 mockKeystoneClient, options);
 
