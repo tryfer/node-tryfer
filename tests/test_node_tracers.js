@@ -188,7 +188,7 @@ module.exports = {
 
       assert_is_json_array(test, body);
       test.equal(body.length, 2);
-      test.ok(now + 1000 <= Date.now())
+      test.ok(now + 1000 <= Date.now());
 
       response.end('done');
       server.close();
