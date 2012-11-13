@@ -68,12 +68,13 @@ var FakeScribe = function(test) {
 
 module.exports = {
   setUp: function(cb) {
-    var self = this;
-    self.trace = new trace.Trace('clientRecv');
-    self.annotation = trace.Annotation.clientRecv(2);
+    this.trace = new trace.Trace('clientRecv');
+    this.annotation = trace.Annotation.clientRecv(2);
+    this.traces = [[this.trace, [this.annotation]]];
     cb();
   },
-  test_restkin_tracer: function(test){
+
+  test_raw_restkin_tracer: function(test){
     var self = this;
     var app = express();
     var server = http.createServer(app);
@@ -88,7 +89,9 @@ module.exports = {
       test.equal(request.headers['x-tenant-id'], '3');
       test.equal(request.headers['content-type'], 'application/json');
       test.notEqual(request.headers['content-length'], '0');
+
       assert_is_json_array(test, request.body);
+      test.equal(request.body.length, 1);
 
       response.end('done');
 
@@ -104,63 +107,157 @@ module.exports = {
     server.listen(22222, 'localhost');
 
     // Valid URL
-    tracer1 = new node_tracers.RESTkinTracer('http://localhost:22222',
+    tracer1 = new node_tracers.RawRESTkinHTTPTracer('http://localhost:22222',
                                              mockKeystoneClient);
 
     // Valid URL with trailing slash
-    tracer2 = new node_tracers.RESTkinTracer('http://localhost:22222/',
+    tracer2 = new node_tracers.RawRESTkinHTTPTracer('http://localhost:22222/',
                                              mockKeystoneClient);
 
-    tracer1.record(self.trace, self.annotation);
-    tracer2.record(self.trace, self.annotation);
+    tracer1.record(self.traces);
+    tracer2.record(self.traces);
   },
-  test_restkin_tracer_server_connection_to_server_refused: function(test) {
+
+  test_raw_restkin_tracer_server_connection_to_server_refused: function(test) {
     var tracer;
 
-    tracer = new node_tracers.RESTkinTracer('http://localhost:1898/',
+    tracer = new node_tracers.RawRESTkinHTTPTracer('http://localhost:1898/',
                                             mockKeystoneClient);
 
-    tracer.record(this.trace, this.annotation);
+    tracer.record(this.traces);
     test.done();
   },
+
+  test_restkin_tracer_maxTraces: function(test) {
+    var self = this;
+    var app = express();
+    var server = http.createServer(app);
+    var tracer;
+    var options;
+
+    app.use(express.bodyParser());
+
+    app.post('/3/trace', function(request, response) {
+      var body = request.body;
+
+      test.equal(request.headers['x-auth-token'], '1');
+      test.equal(request.headers['x-tenant-id'], '3');
+      test.equal(request.headers['content-type'], 'application/json');
+      test.notEqual(request.headers['content-length'], '0');
+
+      assert_is_json_array(test, body);
+      test.equal(body.length, 15);
+
+      response.end('done');
+      tracer.stop();
+      server.close();
+    });
+
+    server.on('close', function(){
+      test.done();
+    });
+
+    server.listen(22222, 'localhost');
+
+    options = {'maxTraces': 15};
+    tracer = new node_tracers.RESTkinHTTPTracer('http://localhost:22222',
+                                            mockKeystoneClient, options);
+
+    for (i = 0; i < 15; i++) {
+      tracer.record(this.traces);
+    }
+  },
+
+  test_restkin_tracer_sendInterval: function(test) {
+    var self = this;
+    var app = express();
+    var server = http.createServer(app);
+    var tracer;
+    var options;
+    var now = Date.now();
+
+    app.use(express.bodyParser());
+
+    app.post('/3/trace', function(request, response) {
+      var body = request.body;
+
+      test.equal(request.headers['x-auth-token'], '1');
+      test.equal(request.headers['x-tenant-id'], '3');
+      test.equal(request.headers['content-type'], 'application/json');
+      test.notEqual(request.headers['content-length'], '0');
+
+      assert_is_json_array(test, body);
+      test.equal(body.length, 2);
+      test.ok(now + 1000 <= Date.now());
+
+      response.end('done');
+      server.close();
+      tracer.stop();
+    });
+
+    server.on('close', function(){
+      test.done();
+    });
+
+    server.listen(22222, 'localhost');
+
+    options = {'sendInterval': 1};
+    tracer = new node_tracers.RESTkinHTTPTracer('http://localhost:22222',
+                                                mockKeystoneClient, options);
+
+    tracer.record(this.traces);
+    tracer.record(this.traces);
+  },
+
   test_zipkin_tracer_default_category: function(test){
-    var self = this;
     var s = new FakeScribe(test);
-    var t = new node_tracers.ZipkinTracer(s);
-    t.record(self.trace, self.annotation);
-    s.assert_sent();
-    s.assert_category('zipkin');
-    s.assert_base64();
-    test.done();
+    var t = new node_tracers.RawZipkinTracer(s);
+    t.record(this.traces);
+
+    setTimeout(function() {
+      s.assert_sent();
+      s.assert_category('zipkin');
+      s.assert_base64();
+      test.done();
+    }, 100);
   },
+
   test_zipkin_tracer_provided_category: function(test){
-    var self = this;
     var s = new FakeScribe(test);
-    var t = new node_tracers.ZipkinTracer(s, 'mycategory');
-    t.record(self.trace, self.annotation);
-    s.assert_sent();
-    s.assert_category('mycategory');
-    s.assert_base64();
-    test.done();
+    var t = new node_tracers.RawZipkinTracer(s, 'mycategory');
+    t.record(this.traces);
+
+    setTimeout(function() {
+      s.assert_sent();
+      s.assert_category('mycategory');
+      s.assert_base64();
+      test.done();
+    }, 100);
   },
+
   test_restkin_scribe_tracer_default_category: function(test){
-    var self = this;
     var s = new FakeScribe(test);
-    var t = new node_tracers.RESTkinScribeTracer(s);
-    t.record(self.trace, self.annotation);
-    s.assert_sent();
-    s.assert_category('restkin');
-    s.assert_json();
-    test.done();
+    var t = new node_tracers.RawRESTkinScribeTracer(s);
+    t.record(this.traces);
+
+    setTimeout(function() {
+      s.assert_sent();
+      s.assert_category('restkin');
+      s.assert_json();
+      test.done();
+    }, 100);
   },
+
   test_restkin_scribe_tracer_provided_category: function(test){
-    var self = this;
     var s = new FakeScribe(test);
-    var t = new node_tracers.RESTkinScribeTracer(s, 'mycategory');
-    t.record(self.trace, self.annotation);
-    s.assert_sent();
-    s.assert_category('mycategory');
-    s.assert_json();
-    test.done();
+    var t = new node_tracers.RawRESTkinScribeTracer(s, 'mycategory');
+    t.record(this.traces);
+
+    setTimeout(function() {
+      s.assert_sent();
+      s.assert_category('mycategory');
+      s.assert_json();
+      test.done();
+    }, 100);
   }
 };

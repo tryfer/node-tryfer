@@ -10,6 +10,7 @@ module.exports = {
       test.deepEqual(tracers.getTracers(), dummy_tracer);
       test.done();
     },
+
     test_push_tracer: function(test){
       var dummy_tracer = "1";
       var dummy_tracer2 = "2";
@@ -21,6 +22,7 @@ module.exports = {
         [dummy_tracer, dummy_tracer2]);
       test.done();
     },
+
     test_set_trace_args: function(test){
       var dummy_tracer = ["i'm a tracer"];
       tracers.setTracers(dummy_tracer);
@@ -31,15 +33,18 @@ module.exports = {
       test.deepEqual(tracers.getTracers(), [dummy_tracer]);
       test.done();
     },
+
     setUp: function(cb){
       tracers.setTracers([]);
       cb();
     },
+
     tearDown: function(cb){
       tracers.setTracers([]);
       cb();
     }
   },
+
   debugTracer: {
     test_writes_to_stream: function(test){
       // setup
@@ -51,9 +56,9 @@ module.exports = {
       debug_tracer = new tracers.DebugTracer(mock_stream);
       t = new trace.Trace('test', {traceId: 1, spanId:2, parentSpanId:1});
       a = new trace.Annotation.timestamp('mytime', 100);
-      debug_tracer.record(t, a);
+      debug_tracer.record([[t, [a]]]);
 
-      formatters.formatForRestkin(t, [a], function(err, json) {
+      formatters.formatTracesForRestkin([[t, [a]]], function(err, json) {
         test.equal(written,
                    '--- Trace ---\n' + JSON.stringify(
                       JSON.parse(json), null, 2) + '\n');
@@ -61,13 +66,14 @@ module.exports = {
       });
     }
   },
+
   endAnnotationTracer: {
     setUp: function(cb){
       var self = this;
       self.sent_traces = [];
       self.tracer = new tracers.EndAnnotationTracer(
-        function(trace, annotations) {
-          self.sent_traces.push([trace, annotations]);
+        function(traces) {
+          self.sent_traces.push(traces);
         });
       self.non_end_annotations = [
         trace.Annotation.timestamp('mytime', 1),
@@ -77,35 +83,38 @@ module.exports = {
       ];
       cb();
     },
+
     test_record_non_end_annotations_does_not_send: function(test) {
       var self = this;
       var t = new trace.Trace('mytrace');
       self.non_end_annotations.forEach(function(annotation) {
-        self.tracer.record(t, annotation);
+        self.tracer.record([[t, [annotation]]]);
         test.equal(self.sent_traces.length, 0);
       });
       test.done();
     },
+
     test_record_sends_all_stored_on_end_annotation: function(test) {
       var self = this;
       var t = new trace.Trace('mytrace');
       var end_annotation = trace.Annotation.clientRecv(2);
       self.non_end_annotations.forEach(function(annotation) {
-        self.tracer.record(t, annotation);
+        self.tracer.record([[t, [annotation]]]);
       });
 
-      self.tracer.record(t, end_annotation);
+      self.tracer.record([[t, [end_annotation]]]);
       test.equal(self.sent_traces.length, 1);
-      test.deepEqual(self.sent_traces[0],
+      test.deepEqual(self.sent_traces[0][0],
                      [t, self.non_end_annotations.concat([end_annotation])]);
       test.done();
     },
+
     test_record_sends_on_clientRecv_and_serverSend: function(test) {
       var self = this;
-      self.tracer.record(new trace.Trace('clientRecv'),
-                         trace.Annotation.clientRecv(2));
-      self.tracer.record(new trace.Trace('serverSend'),
-                         trace.Annotation.serverSend(2));
+      self.tracer.record([[new trace.Trace('clientRecv'),
+                         [trace.Annotation.clientRecv(2)]]]);
+      self.tracer.record([[new trace.Trace('serverSend'),
+                         [trace.Annotation.serverSend(2)]]]);
       test.equal(self.sent_traces.length, 2);
       test.done();
     }
