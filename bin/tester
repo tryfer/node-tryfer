@@ -19,5 +19,3 @@ basedir=`dirname $0`
 ./node_modules/.bin/nodeunit tests
 
 echo "Running linter..."
-#./bin/lint
-echo "Linting complete."
