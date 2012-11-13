@@ -58,9 +58,9 @@ request(
     if (error !== undefined && error !== null) {
       t.record(trace.Annotation.string(error.toString()));
     } else {
-      t.record(trace.Annotation.string('status_code',
+      t.record(trace.Annotation.string('http.response.code',
                                           response.statusCode.toString()));
-      t.record(trace.Annotation.string('headers', JSON.stringify(response.headers)));
-      t.record(trace.Annotation.string('body', body));
+      t.record(trace.Annotation.string('http.request.headers', JSON.stringify(response.headers)));
+      t.record(trace.Annotation.string('http.response.body', body));
     }
   });
