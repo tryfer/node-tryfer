@@ -59,7 +59,7 @@ module.exports = {
       traces = [[t, [a]]];
       debug_tracer.record(traces);
 
-      formatters.formatForRestkin(t, [a], function(err, json) {
+      formatters.formatForRestkin(traces, function(err, json) {
         var expected = '--- Trace ---\n' + JSON.stringify(
                       JSON.parse(json), null, 2) + '\n';
         test.equal(written, expected);

@@ -48,9 +48,9 @@ var testcases = {
 // one of the test cases from above, and the expected object represented
 // by the formatted json string
 var testRestkinFormatter = function (test, testcase, expected) {
-  formatters.formatForRestkin(testcase.trace, testcase.annotations,
-    function(formatError, jsonStr) {
-      test.equal(formatError, null);
+  formatters.formatForRestkin([[testcase.trace, testcase.annotations]],
+    function(err, jsonStr) {
+      test.equal(err, null);
       test.deepEqual(JSON.parse(jsonStr), expected);
       test.done();
     });

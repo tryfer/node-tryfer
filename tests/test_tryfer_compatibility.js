@@ -29,7 +29,7 @@ formatters.formatForZipkin(sample_trace, sample_annotations,
       console.log('expected: ' + expected_base64 + "\nresult:   " + value);
     }
   });
-formatters.formatForRestkin(sample_trace, sample_annotations,
+formatters.formatForRestkin([[sample_trace, sample_annotations]],
   function(error, value) {
     var expected = JSON.parse(expected_json);
     var result = JSON.parse(value);
