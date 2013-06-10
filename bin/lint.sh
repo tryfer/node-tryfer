@@ -14,4 +14,4 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-./node_modules/.bin/jshint lib/*.js tests/*.js examples/*.js 
+./node_modules/.bin/jshint lib/*.js tests/*.js examples/*.js --config jshint.json
