@@ -134,6 +134,7 @@ module.exports = {
     var server = http.createServer(app);
     var tracer;
     var options;
+    var i;
 
     app.use(express.bodyParser());
 
