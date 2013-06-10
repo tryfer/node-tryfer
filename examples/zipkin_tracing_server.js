@@ -58,7 +58,6 @@ app.get('/', function(request, response) {
   // By Tryfer convention, and by what finagle does, a SERVER_SEND annotation
   // should be made as soon as a response is sent
   t.record(trace.Annotation.serverSend());
-  //zipkinTracer.sendTraces([t]);
 });
 
 app.listen(8080, 'localhost');
