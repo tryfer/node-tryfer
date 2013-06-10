@@ -19,24 +19,25 @@
 
 var request = require('request');
 
-var trace =        require('..').trace
-    ,tracers =     require('..').tracers
-    ,nodeTracers = require('..').node_tracers
-    ,Scribe =      require('scribe').Scribe;
+var trace = require('..').trace;
+var tracers = require('..').tracers;
+var nodeTracers = require('..').node_tracers;
+
+var Scribe = require('scribe').Scribe;
 
 var method, uri, t;
 
 if (process.argv.length < 4) {
-    console.log("Usage: " +
-        process.argv.slice(0, 2).concat(['method', 'uri']).join(" "));
-    process.exit(1);
+  console.log("Usage: " +
+    process.argv.slice(0, 2).concat(['method', 'uri']).join(" "));
+  process.exit(1);
 }
 
 method = process.argv[2];
 uri = process.argv[3];
 
-// DebugTracer prints traces to stdout
-tracers.pushTracer(new nodeTracers.ZipkinTracer(new Scribe("localhost",1463,{autoReconnect:true})));
+// Zipkin sends traces to Scribe
+tracers.pushTracer(new nodeTracers.ZipkinTracer(new Scribe('localhost',1463,{autoReconnect:true})));
 // DebugTracer prints traces to stdout
 tracers.pushTracer(new tracers.DebugTracer(process.stdout));
 
@@ -51,20 +52,20 @@ t.record(trace.Annotation.clientSend());
 
 // Make the request after the CLIENT_SEND annotation has been recorded
 request(
-    {method: method, uri: uri, headers: t.toHeaders()},
-    function (error, response, body) {
+  {method: method, uri: uri, headers: t.toHeaders()},
+  function (error, response, body) {
 
-        // by Tryfer convention, and by what finagle does, a CLIENT_RECV annotation
-        // should be made as soon as a response is returned
-        t.record(trace.Annotation.clientRecv());
+    // by Tryfer convention, and by what finagle does, a CLIENT_RECV annotation
+    // should be made as soon as a response is returned
+    t.record(trace.Annotation.clientRecv());
 
-        // Other annotations based on the response can also be made
-        if (error !== undefined && error !== null) {
-            t.record(trace.Annotation.string(error.toString()));
-        } else {
-            t.record(trace.Annotation.string('http.response.code',
-                response.statusCode.toString()));
-            t.record(trace.Annotation.string('http.request.headers', JSON.stringify(response.headers)));
-            t.record(trace.Annotation.string('http.response.body', body));
-        }
-    });
+    // Other annotations based on the response can also be made
+    if (error !== undefined && error !== null) {
+      t.record(trace.Annotation.string(error.toString()));
+    } else {
+      t.record(trace.Annotation.string('http.response.code',
+        response.statusCode.toString()));
+      t.record(trace.Annotation.string('http.request.headers', JSON.stringify(response.headers)));
+      t.record(trace.Annotation.string('http.response.body', body));
+    }
+  });

@@ -19,39 +19,40 @@
 
 var express = require('express');
 
-var trace =        require('..').trace
-    ,tracers =     require('..').tracers
-    ,nodeTracers = require('..').node_tracers
-    ,Scribe =      require('scribe').Scribe;
+var trace = require('..').trace;
+var tracers = require('..').tracers;
+var nodeTracers = require('..').node_tracers;
+
+var Scribe = require('scribe').Scribe;
 
 // ZipkinTracer - requires Scribe running locally.
-tracers.pushTracer(new nodeTracers.ZipkinTracer(new Scribe("localhost",1463,{autoReconnect:true})));
+tracers.pushTracer(new nodeTracers.ZipkinTracer(new Scribe('localhost',1463,{autoReconnect:true})));
 // DebugTracer prints traces to stdout
 tracers.pushTracer(new tracers.DebugTracer(process.stdout));
 
 var app = express();
 
 app.get('/', function(request, response) {
-    // Create a trace from the request.  Alternately,
-    // {trace.Trace.fromHeaders} could also be used (called with the request
-    // method name and the request headers, because by Tryfer convention, the
-    // trace used for http requests should be named by the request method)
-    // but {trace.Trace.fromRequest} also adds an endpoint based on the socket
-    // on the request.
-    var t = trace.Trace.fromRequest(request, 'example-http-server');
-    // Record the server receive annotation as soon as possible
-    t.record(trace.Annotation.serverRecv());
+  // Create a trace from the request.  Alternately,
+  // {trace.Trace.fromHeaders} could also be used (called with the request
+  // method name and the request headers, because by Tryfer convention, the
+  // trace used for http requests should be named by the request method)
+  // but {trace.Trace.fromRequest} also adds an endpoint based on the socket
+  // on the request.
+  var t = trace.Trace.fromRequest(request, 'example-http-server');
+  // Record the server receive annotation as soon as possible
+  t.record(trace.Annotation.serverRecv());
 
-    // Other annotations can also be recorded
-    t.record(trace.Annotation.string('request_headers',
-        JSON.stringify(request.headers)));
-    response.statusCode = 200;
-    response.write('this is the body');
-    response.end();
+  // Other annotations can also be recorded
+  t.record(trace.Annotation.string('request_headers',
+    JSON.stringify(request.headers)));
+  response.statusCode = 200;
+  response.write('this is the body');
+  response.end();
 
-    // By Tryfer convention, and by what finagle does, a SERVER_SEND annotation
-    // should be made as soon as a response is sent
-    t.record(trace.Annotation.serverSend());
+  // By Tryfer convention, and by what finagle does, a SERVER_SEND annotation
+  // should be made as soon as a response is sent
+  t.record(trace.Annotation.serverSend());
 });
 
 app.listen(8080, 'localhost');
