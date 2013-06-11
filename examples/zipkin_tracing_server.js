@@ -26,7 +26,12 @@ var nodeTracers = require('..').node_tracers;
 var Scribe = require('scribe').Scribe;
 
 // ZipkinTracer - requires Scribe running locally.
-tracers.pushTracer(new nodeTracers.ZipkinTracer(new Scribe('localhost',1463,{autoReconnect:true})));
+var scribeClient = new Scribe('localhost',1463,{autoReconnect:true});
+scribeClient.open(function(err){
+  console.log(err);
+});
+var zipkinTracer = new nodeTracers.ZipkinTracer(scribeClient,'test',{maxTraces:5});
+tracers.pushTracer(zipkinTracer);
 // DebugTracer prints traces to stdout
 tracers.pushTracer(new tracers.DebugTracer(process.stdout));
 

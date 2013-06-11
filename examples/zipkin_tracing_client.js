@@ -37,7 +37,11 @@ method = process.argv[2];
 uri = process.argv[3];
 
 // Zipkin sends traces to Scribe
-tracers.pushTracer(new nodeTracers.ZipkinTracer(new Scribe('localhost',1463,{autoReconnect:true})));
+var scribeClient = new Scribe('localhost',1463,{autoReconnect:true});
+scribeClient.open(function(err){
+  console.log(err);
+});
+tracers.pushTracer(new nodeTracers.ZipkinTracer(scribeClient));
 // DebugTracer prints traces to stdout
 tracers.pushTracer(new tracers.DebugTracer(process.stdout));
 
