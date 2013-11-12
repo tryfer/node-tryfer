@@ -85,6 +85,15 @@ module.exports = {
       test.equal(c.parentSpanId, 1);
       test.done();
     },
+    test_trace_child_passes_tracers: function(test){
+      var o = {traceId: 1, spanId: 1, tracers: [1]};
+      var t = new trace.Trace('test_trace', o);
+      var c = t.child('child_test_trace');
+      test.equal(c.traceId, 1);
+      test.equal(c.parentSpanId, 1);
+      test.equal(c._tracers[0], 1);
+      test.done();
+    },
     test_record_invokes_tracer: function(test){
       var tracer, t, a;
       tracer = new mockTracer();
