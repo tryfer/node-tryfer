@@ -122,7 +122,7 @@ module.exports = {
 
     test_record_for_child_spans: function(test) {
       var self = this;
-      var span = new trace.Trace('server')
+      var span = new trace.Trace('server');
       self.tracer.record([[span,
                          [trace.Annotation.serverRecv(2)]]]);
       self.tracer.record([[span,
@@ -143,6 +143,25 @@ module.exports = {
       // Check that we end up with 3 annotations for each span
       test.equal(self.sent_traces[0][0][1].length, 3);
       test.equal(self.sent_traces[1][0][1].length, 3);
+      test.done();
+    },
+
+    test_annotation_records_do_not_grow_infinitely: function(test) {
+      var self = this;
+      var t = new trace.Trace('mytrace');
+
+      test.equal(Object.keys(self.tracer.annotationsForSpan).length, 0);
+
+      self.tracer.record([[t, [trace.Annotation.clientSend(2)]]]);
+      test.equal(Object.keys(self.tracer.annotationsForSpan).length, 1);
+      test.equal(
+        Object.keys(self.tracer.annotationsForSpan[t.traceId]).length,
+        1);
+
+      self.tracer.record([[t, [trace.Annotation.clientRecv(2)]]]);
+
+      test.equal(Object.keys(self.tracer.annotationsForSpan).length, 0);
+
       test.done();
     }
   }
