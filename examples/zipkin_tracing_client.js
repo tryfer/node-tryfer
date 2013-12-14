@@ -59,11 +59,13 @@ request(
   {method: method, uri: uri, headers: t.toHeaders()},
   function (error, response, body) {
 
-    // by Tryfer convention, and by what finagle does, a CLIENT_RECV annotation
-    // should be made as soon as a response is returned
-    t.record(trace.Annotation.clientRecv());
+    // By Tryfer convention, and by what finagle does, a CLIENT_RECV
+    // annotation should be made as soon as a response is returned.
+    // However, including additional annotations based on the response
+    // would be useful, and these have to be recorded before the
+    // CLIENT_RECV is sent, since that the CLIENT_RECV ends the trace.
 
-    // Other annotations based on the response can also be made
+    // Response-based annotations
     if (error !== undefined && error !== null) {
       t.record(trace.Annotation.string(error.toString()));
     } else {
@@ -72,4 +74,7 @@ request(
       t.record(trace.Annotation.string('http.request.headers', JSON.stringify(response.headers)));
       t.record(trace.Annotation.string('http.response.body', body));
     }
+
+    // CLIENT_RECV
+    t.record(trace.Annotation.clientRecv());
   });
