@@ -35,6 +35,7 @@
   },
   "optionalDependencies": {
     "keystone-client": ">= 0.3.0",
+    "microtime": "0.5.1",
     "scribe": ""
   },
   "engines": {

@@ -226,16 +226,9 @@ module.exports = {
   },
   annotationTests: {
     setUp: function(cb){
-      var self = this;
-      self.origDate = Date.now;
-      Date.now = function() {
-        return 1000;
-      };
-      cb();
-    },
-    tearDown: function(cb){
-      var self = this;
-      Date.now = self.origDate;
+      trace._overrideGetNowMicros(function() {
+        return 1000000;
+      });
       cb();
     },
     test_timestamp: function(test) {
