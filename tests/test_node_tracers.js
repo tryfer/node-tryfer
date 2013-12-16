@@ -65,12 +65,23 @@ var FakeScribe = function(test) {
   };
 };
 
+// Creates n traces
+var createTraces = function(n) {
+  var i;
+  var traces = [];
+
+  for (i = 0; i < n; i++) {
+    traces.push(
+      [new trace.Trace('clientRecv'), [trace.Annotation.clientRecv(2)]]);
+  }
+
+  return traces;
+};
+
 
 module.exports = {
   setUp: function(cb) {
-    this.trace = new trace.Trace('clientRecv');
-    this.annotation = trace.Annotation.clientRecv(2);
-    this.traces = [[this.trace, [this.annotation]]];
+    this.traces = createTraces(1);
     cb();
   },
 
@@ -232,6 +243,20 @@ module.exports = {
       s.assert_sent();
       s.assert_category('mycategory');
       s.assert_base64();
+      test.done();
+    }, 100);
+  },
+
+  /* Since RawZipkinTracer sends in batches of 10, ensure that if there are
+   * more than 10 traces all of them get sent.
+   */
+  test_zipkin_tracer_over_10_traces: function(test) {
+    var s = new FakeScribe(test);
+    var t = new node_tracers.RawZipkinTracer(s);
+    t.sendTraces(createTraces(15));
+
+    setTimeout(function() {
+      test.equal(s.results.length, 15);
       test.done();
     }, 100);
   },
