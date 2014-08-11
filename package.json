@@ -24,7 +24,7 @@
   "dependencies": {
     "thrift": "0.7.0",
     "async": "0.1.22",
-    "request": "2.11.4"
+    "request": "2.40.0"
   },
   "devDependencies": {
     "express": ">= 3.2.6 < 3.3",
