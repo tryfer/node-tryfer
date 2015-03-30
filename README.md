@@ -67,6 +67,6 @@ In the server terminal, you will see a list of all the traces that the server re
 
 Note that the trace id and the span id are the same, showing that this is all part of the same trace.  In addition, the server adds its endpoint to the trace (where the server is running).
 
-There should be a server receive annotation, zeor or more string annotations containing information about the request itself, and then a server send annotation.
+There should be a server receive annotation, zero or more string annotations containing information about the request itself, and then a server send annotation.
 
 In both the client and the server example, the debug tracer is used to print out the traces.  Not all tracers do something as soon as `record` is called - some tracers may batch up annotations and/or traces, as opposed to shipping them to zipkin as soon as `record` as called.
