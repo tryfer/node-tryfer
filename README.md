@@ -40,7 +40,7 @@ In the client terminal, you will see a list of all the traces that the client re
       }
     ]
 
-There should be a URI annotation, a client send annotation, a client receive annotation, and extra string annotations documentiong aspects of the response from the server.
+There should be a URI annotation, a client send annotation, a client receive annotation, and extra string annotations documenting aspects of the response from the server.
 
 In the server terminal, you will see a list of all the traces that the server records, which look like this:
 
