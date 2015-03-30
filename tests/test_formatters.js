@@ -14,6 +14,7 @@
 
 var util = require('util');
 
+var Int64 = require('node-int64');
 var _ = require('underscore');
 var tprotocol = require('../node_modules/thrift/lib/thrift/protocol');
 var ttransport = require('../node_modules/thrift/lib/thrift/transport');
@@ -132,11 +133,11 @@ module.exports = {
       testZipkinFormatter(
         test, testcases.basic_trace_and_annotations,
         new zipkinCore_types.Span({
-          trace_id: 1,
-          id: 10,
+          trace_id: new Int64(1),
+          id: new Int64(10),
           name: 'test',
           annotations: [ new zipkinCore_types.Annotation({
-            timestamp: 1,
+            timestamp: new Int64(1),
             value: 'name1'
           })],
           binary_annotations: [ new zipkinCore_types.BinaryAnnotation({
@@ -150,9 +151,9 @@ module.exports = {
       testZipkinFormatter(
         test, testcases.trace_with_parentSpanId,
         new zipkinCore_types.Span({
-          trace_id: 1,
-          parent_id: 5,
-          id: 10,
+          trace_id: new Int64(1),
+          parent_id: new Int64(5),
+          id: new Int64(10),
           name: 'test',
           annotations: [],
           binary_annotations: []
@@ -162,11 +163,11 @@ module.exports = {
       testZipkinFormatter(
         test, testcases.trace_with_annotation_with_endpoint,
         new zipkinCore_types.Span({
-            trace_id: 1,
-            id: 10,
+            trace_id: new Int64(1),
+            id: new Int64(10),
             name: 'test',
             annotations: [ new zipkinCore_types.Annotation({
-              timestamp: 1,
+              timestamp: new Int64(1),
               value: 'name1',
               host: new zipkinCore_types.Endpoint({
                 // formula is (first octet * 256^3) + (second octet * 256^2) +
