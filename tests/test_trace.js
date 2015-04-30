@@ -178,7 +178,6 @@ module.exports = {
       test.equal(t.name, 'POST');
       test.equal(t.traceId, formatters._hexStringify(1));
       test.equal(t.spanId, formatters._hexStringify(10));
-      test.equal('blah', 'blah');
       test.equal(t.parentSpanId, formatters._hexStringify(5));
       test.done();
     },
