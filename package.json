@@ -2,7 +2,7 @@
   "author": "Rackspace US, Inc.",
   "name": "tryfer",
   "description": "Port of the tryfer Twisted/Python tracing library and Zipkin client",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "main": "./index",
   "contributors": [
       {
