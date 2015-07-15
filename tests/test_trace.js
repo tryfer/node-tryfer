@@ -19,8 +19,9 @@ var _ = require("underscore");
 
 var trace = require('..').trace;
 var tracers = require('..').tracers;
+var formatters = require('..').formatters;
 
-var MAX_ID = Math.pow(2, 63) -1;
+var MAX_ID = 'ffffffffffffffff';
 
 ass.isNum = function(num, message){
   ass.equal(isNaN(num), false,
@@ -43,14 +44,14 @@ var mockTracer = function(name, id, endpoint){
 // than or equal to zero and less than the max id
 var assert_is_valid_trace = function(test, t) {
   test.notEqual(t.traceId, undefined);
-  test.isNum(t.traceId);
+  test.ok(typeof t.traceId === 'string');
   test.ok(t.traceId < MAX_ID);
-  test.ok(t.traceId >= 0);
+  test.ok(t.traceId.length === 16);
 
   test.notEqual(t.spanId, undefined);
-  test.isNum(t.spanId);
-  test.ok(t.spanId < MAX_ID);
-  test.ok(t.spanId >= 0);
+	test.ok(typeof t.traceId === 'string');
+	test.ok(t.spanId < MAX_ID);
+  test.ok(t.spanId.length === 16);
 };
 
 // generate an Annotation test
@@ -161,8 +162,8 @@ module.exports = {
         });
 
       test.equal(t.name, 'POST');
-      test.equal(t.traceId, 10);
-      test.equal(t.spanId, 10);
+      test.equal(t.traceId, formatters._hexStringify(10));
+      test.equal(t.spanId, formatters._hexStringify(10));
       test.equal(t.parentSpanId, undefined);
       test.done();
     },
@@ -175,9 +176,9 @@ module.exports = {
         });
 
       test.equal(t.name, 'POST');
-      test.equal(t.traceId, 1);
-      test.equal(t.spanId, 10);
-      test.equal(t.parentSpanId, 5);
+      test.equal(t.traceId, formatters._hexStringify(1));
+      test.equal(t.spanId, formatters._hexStringify(10));
+      test.equal(t.parentSpanId, formatters._hexStringify(5));
       test.done();
     },
     test_fromRequest_calls_fromHeaders: function(test) {
