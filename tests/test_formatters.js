@@ -32,6 +32,11 @@ var testcases = {
     annotations: [new trace.Annotation.timestamp('name1', 1),
                   new trace.Annotation.string('name2', '2')]
   },
+  trace_with_optional_params: {
+    trace: new trace.Trace('test', {spanId: 10, traceId:1, debug: true}),
+    annotations: [new trace.Annotation.timestamp('name1', 1),
+                  new trace.Annotation.string('name2', '2')]
+  },
   trace_with_parentSpanId: {
     trace: new trace.Trace('test', {parentSpanId:5, spanId: 10, traceId:1}),
     annotations: []
@@ -84,6 +89,26 @@ module.exports = {
         trace_id: '0000000000000001',
         span_id: '000000000000000a',
         name: 'test',
+        annotations: [
+          {
+            key: 'name1',
+            value: 1,
+            type: 'timestamp'
+          },
+          {
+            key: 'name2',
+            value: '2',
+            type: 'string'
+          }
+        ]
+      }]);
+    },
+    test_trace_with_optional_params: function (test) {
+      testRestkinFormatter(test, testcases.trace_with_optional_params, [{
+        trace_id: '0000000000000001',
+        span_id: '000000000000000a',
+        name: 'test',
+        debug: true,
         annotations: [
           {
             key: 'name1',
