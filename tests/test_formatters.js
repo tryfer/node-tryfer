@@ -172,6 +172,25 @@ module.exports = {
           })]
         }));
     },
+    test_trace_with_optional_params: function(test){
+      testZipkinFormatter(
+        test, testcases.trace_with_optional_params,
+        new zipkinCore_types.Span({
+          trace_id: new Int64(1),
+          id: new Int64(10),
+          name: 'test',
+          debug: true,
+          annotations: [ new zipkinCore_types.Annotation({
+            timestamp: new Int64(1),
+            value: 'name1'
+          })],
+          binary_annotations: [ new zipkinCore_types.BinaryAnnotation({
+            value: '2',
+            key: 'name2',
+            annotation_type: zipkinCore_types.AnnotationType.STRING
+          })]
+        }));
+    },
     test_trace_with_parentSpanId: function(test){
       testZipkinFormatter(
         test, testcases.trace_with_parentSpanId,
