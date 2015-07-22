@@ -76,6 +76,15 @@ module.exports = {
       var t = new trace.Trace('test_trace');
       test.equal(t.name, 'test_trace');
       test.equal(t.parentSpanId, undefined);
+      test.equal(t.debug, undefined);
+      assert_is_valid_trace(test, t);
+      test.done();
+    },
+    test_new_trace_debug: function(test){
+      var t = new trace.Trace('test_trace', {debug: true});
+      test.equal(t.name, 'test_trace');
+      test.equal(t.parentSpanId, undefined);
+      test.equal(t.debug, true);
       assert_is_valid_trace(test, t);
       test.done();
     },
@@ -84,6 +93,15 @@ module.exports = {
       var c = t.child('child_test_trace');
       test.equal(c.traceId, 1);
       test.equal(c.parentSpanId, 1);
+      test.equal(c.debug, undefined);
+      test.done();
+    },
+    test_trace_child_debug: function(test){
+      var t = new trace.Trace('test_trace', {traceId: 1, spanId: 1, debug: true});
+      var c = t.child('child_test_trace');
+      test.equal(c.traceId, 1);
+      test.equal(c.parentSpanId, 1);
+      test.equal(c.debug, true);
       test.done();
     },
     test_trace_child_passes_tracers: function(test){
