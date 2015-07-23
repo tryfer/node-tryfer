@@ -188,7 +188,8 @@ module.exports = {
           debug: true,
           annotations: [ new zipkinCore_types.Annotation({
             timestamp: new Int64(1),
-            value: 'name1'
+            value: 'name1',
+            duration: 123
           })],
           binary_annotations: [ new zipkinCore_types.BinaryAnnotation({
             value: '2',
