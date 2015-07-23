@@ -34,7 +34,7 @@ var testcases = {
   },
   trace_with_optional_params: {
     trace: new trace.Trace('test', {spanId: 10, traceId:1, debug: true}),
-    annotations: [new trace.Annotation.timestamp('name1', 1),
+    annotations: [new trace.Annotation.timestamp('name1', 1, 123),
                   new trace.Annotation.string('name2', '2')]
   },
   trace_with_parentSpanId: {
@@ -118,7 +118,8 @@ module.exports = {
           {
             key: 'name1',
             value: 1,
-            type: 'timestamp'
+            type: 'timestamp',
+            duration: 123
           },
           {
             key: 'name2',
