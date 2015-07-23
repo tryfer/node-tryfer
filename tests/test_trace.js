@@ -55,10 +55,11 @@ var assert_is_valid_trace = function(test, t) {
 };
 
 // generate an Annotation test
-var runAnnotationTest = function(test, ann, name, value, ann_type) {
+var runAnnotationTest = function(test, ann, name, value, ann_type, duration) {
   test.equal(ann.name, name);
   test.equal(ann.value, value);
   test.equal(ann.annotationType, ann_type);
+  test.equal(ann.duration, duration);
   test.done();
 };
 
@@ -253,6 +254,10 @@ module.exports = {
     test_timestamp: function(test) {
       runAnnotationTest(test, trace.Annotation.timestamp('test'), 'test',
                         1000000, 'timestamp');
+    },
+    test_timestamp_with_duration: function(test) {
+      runAnnotationTest(test, trace.Annotation.timestamp('test', undefined, 123), 'test',
+                        1000000, 'timestamp', 123);
     },
     test_client_send: function(test) {
       runAnnotationTest(test, trace.Annotation.clientSend(), 'cs', 1000000,
