@@ -73,6 +73,11 @@ var testZipkinFormatter = function (test, testcase, expected) {
         var prot = new tprotocol.TBinaryProtocol(trans);
         var span = new zipkinCore_types.Span();
         span.read(prot);
+        _.each(span.binary_annotations, function (annotation) {
+          if (annotation.value) {
+            annotation.value = annotation.value.toString();
+          }
+        });
         test.deepEqual(span, expected);
         test.done();
       });
