@@ -55,10 +55,11 @@ var assert_is_valid_trace = function(test, t) {
 };
 
 // generate an Annotation test
-var runAnnotationTest = function(test, ann, name, value, ann_type) {
+var runAnnotationTest = function(test, ann, name, value, ann_type, duration) {
   test.equal(ann.name, name);
   test.equal(ann.value, value);
   test.equal(ann.annotationType, ann_type);
+  test.equal(ann.duration, duration);
   test.done();
 };
 
@@ -76,6 +77,15 @@ module.exports = {
       var t = new trace.Trace('test_trace');
       test.equal(t.name, 'test_trace');
       test.equal(t.parentSpanId, undefined);
+      test.equal(t.debug, undefined);
+      assert_is_valid_trace(test, t);
+      test.done();
+    },
+    test_new_trace_debug: function(test){
+      var t = new trace.Trace('test_trace', {debug: true});
+      test.equal(t.name, 'test_trace');
+      test.equal(t.parentSpanId, undefined);
+      test.equal(t.debug, true);
       assert_is_valid_trace(test, t);
       test.done();
     },
@@ -84,6 +94,15 @@ module.exports = {
       var c = t.child('child_test_trace');
       test.equal(c.traceId, 1);
       test.equal(c.parentSpanId, 1);
+      test.equal(c.debug, undefined);
+      test.done();
+    },
+    test_trace_child_debug: function(test){
+      var t = new trace.Trace('test_trace', {traceId: 1, spanId: 1, debug: true});
+      var c = t.child('child_test_trace');
+      test.equal(c.traceId, 1);
+      test.equal(c.parentSpanId, 1);
+      test.equal(c.debug, true);
       test.done();
     },
     test_trace_child_passes_tracers: function(test){
@@ -235,6 +254,10 @@ module.exports = {
     test_timestamp: function(test) {
       runAnnotationTest(test, trace.Annotation.timestamp('test'), 'test',
                         1000000, 'timestamp');
+    },
+    test_timestamp_with_duration: function(test) {
+      runAnnotationTest(test, trace.Annotation.timestamp('test', undefined, 123), 'test',
+                        1000000, 'timestamp', 123);
     },
     test_client_send: function(test) {
       runAnnotationTest(test, trace.Annotation.clientSend(), 'cs', 1000000,
