@@ -15,7 +15,6 @@
 var util = require('util');
 
 var ass = require('nodeunit').assert;
-var _ = require("underscore");
 
 var trace = require('..').trace;
 var tracers = require('..').tracers;
@@ -23,11 +22,10 @@ var formatters = require('..').formatters;
 
 var MAX_ID = 'ffffffffffffffff';
 
-ass.isNum = function(num, message){
+ass.isNum = function(num){
   ass.equal(isNaN(num), false,
     util.format("%s is not number like", num));
 };
-
 
 var mockTracer = function(name, id, endpoint){
   var self = this;
@@ -222,6 +220,48 @@ module.exports = {
       var t = new trace.Trace.fromRequest(
         {method: 'GET', headers: {}}, 'this_is_a_service');
       test.equal(t.endpoint.serviceName, "this_is_a_service");
+      test.done();
+    },
+    test_fromRequest_endpoint_with_ipv6_localhost: function(test) {
+      var t = new trace.Trace.fromRequest({
+        method: 'GET',
+        headers: {},
+        socket: {
+          address: function() {
+            return {family: 2, port: 8888, address: '::1'};
+          }
+        }
+      });
+      test.equal(t.endpoint.ipv4, '127.0.0.1');
+      test.equal(t.endpoint.port, 8888);
+      test.done();
+    },
+    test_fromRequest_endpoint_with_ipv6_mapped_localhost: function(test) {
+      var t = new trace.Trace.fromRequest({
+        method: 'GET',
+        headers: {},
+        socket: {
+          address: function() {
+            return {family: 2, port: 8888, address: '::ffff:127.0.0.1'};
+          }
+        }
+      });
+      test.equal(t.endpoint.ipv4, '127.0.0.1');
+      test.equal(t.endpoint.port, 8888);
+      test.done();
+    },
+    test_fromRequest_endpoint_with_other_ipv6: function(test) {
+      var t = new trace.Trace.fromRequest({
+        method: 'GET',
+        headers: {},
+        socket: {
+          address: function() {
+            return {family: 2, port: 8888, address: '2001:db8::ff00:42:8329'};
+          }
+        }
+      });
+      test.equal(t.endpoint.ipv4, '0.0.0.0');
+      test.equal(t.endpoint.port, 8888);
       test.done();
     }
   },
