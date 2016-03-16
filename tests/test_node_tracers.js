@@ -285,5 +285,130 @@ module.exports = {
       s.assert_json();
       test.done();
     }, 100);
+  },
+
+  test_raw_zipkin_query_tracer: function(test){
+    var self = this;
+    var app = express();
+    var server = http.createServer(app);
+    var tracer1, tracer2;
+    var i = 0;
+
+    app.use(express.bodyParser());
+
+    app.post('/api/v1/spans', function(request, response) {
+      i++;
+      test.equal(request.headers['content-type'], 'application/json');
+      test.notEqual(request.headers['content-length'], '0');
+
+      assert_is_json_array(test, request.body);
+      test.equal(request.body.length, 1);
+
+      response.end('done');
+
+      if (i === 2) {
+        server.close();
+      }
+    });
+
+    server.on('close', function(){
+      test.done();
+    });
+
+    server.listen(22222, 'localhost');
+
+    // Valid URL
+    tracer1 = new node_tracers.RawZipkinQueryServiceHTTPTracer('http://localhost:22222');
+
+    // Valid URL with trailing slash
+    tracer2 = new node_tracers.RawZipkinQueryServiceHTTPTracer('http://localhost:22222/');
+
+    tracer1.record(self.traces);
+    tracer2.record(self.traces);
+  },
+
+  test_raw_zipkin_query_tracer_server_connection_to_server_refused: function(test) {
+    var tracer;
+
+    tracer = new node_tracers.RawZipkinQueryServiceHTTPTracer('http://localhost:1898/');
+
+    tracer.record(this.traces);
+    test.done();
+  },
+
+  test_zipkin_query_maxTraces: function(test) {
+    var self = this;
+    var app = express();
+    var server = http.createServer(app);
+    var tracer;
+    var options;
+    var i;
+
+    app.use(express.bodyParser());
+
+    app.post('/api/v1/spans', function(request, response) {
+      var body = request.body;
+
+      test.equal(request.headers['content-type'], 'application/json');
+      test.notEqual(request.headers['content-length'], '0');
+
+      assert_is_json_array(test, body);
+      test.equal(body.length, 15);
+
+      response.end('done');
+      tracer.stop();
+      server.close();
+    });
+
+    server.on('close', function(){
+      test.done();
+    });
+
+    server.listen(22222, 'localhost');
+
+    options = {'maxTraces': 15};
+    tracer = new node_tracers.ZipkinQueryServiceHTTPTracer('http://localhost:22222', options);
+
+    for (i = 0; i < 15; i++) {
+      tracer.record(this.traces);
+    }
+  },
+
+  test_zipkin_query_sendInterval: function(test) {
+    var self = this;
+    var app = express();
+    var server = http.createServer(app);
+    var tracer;
+    var options;
+    var now = Date.now();
+
+    app.use(express.bodyParser());
+
+    app.post('/api/v1/spans', function(request, response) {
+      var body = request.body;
+
+      test.equal(request.headers['content-type'], 'application/json');
+      test.notEqual(request.headers['content-length'], '0');
+
+      assert_is_json_array(test, body);
+      test.equal(body.length, 2);
+      test.ok(now + 1000 <= Date.now());
+
+      response.end('done');
+      server.close();
+      tracer.stop();
+    });
+
+    server.on('close', function(){
+      test.done();
+    });
+
+    server.listen(22222, 'localhost');
+
+    options = {'sendInterval': 1};
+    tracer = new node_tracers.ZipkinQueryServiceHTTPTracer('http://localhost:22222', options);
+
+    tracer.record(this.traces);
+    tracer.record(this.traces);
   }
 };
