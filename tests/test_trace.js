@@ -173,7 +173,7 @@ module.exports = {
       test.deepEqual(t.toHeaders(headers), {
         'X-B3-TraceId': '0000000000000001',
         'X-B3-SpanId': '000000000000000a',
-        'X-B3-Sampled' : true, 
+        'X-B3-Sampled' : true,
         'Content-Type': 'application/json'
       });
       test.done();
