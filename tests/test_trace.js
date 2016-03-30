@@ -153,7 +153,7 @@ module.exports = {
       test.deepEqual(t.toHeaders(), {
         'X-B3-TraceId': '0000000000000001',
         'X-B3-SpanId': '000000000000000a',
-        'X-B3-Sampled' : true
+        'X-B3-Sampled' : '1'
       });
       test.done();
     },
@@ -163,7 +163,7 @@ module.exports = {
         'X-B3-TraceId': '0000000000000001',
         'X-B3-SpanId': '000000000000000a',
         'X-B3-ParentSpanId': '0000000000000005',
-        'X-B3-Sampled' : true
+        'X-B3-Sampled' : '1'
       });
       test.done();
     },
@@ -173,7 +173,7 @@ module.exports = {
       test.deepEqual(t.toHeaders(headers), {
         'X-B3-TraceId': '0000000000000001',
         'X-B3-SpanId': '000000000000000a',
-        'X-B3-Sampled' : true,
+        'X-B3-Sampled' : '1',
         'Content-Type': 'application/json'
       });
       test.done();
@@ -218,7 +218,7 @@ module.exports = {
         {
           'x-b3-traceid': '0000000000000001',
           'x-b3-spanid': '000000000000000a',
-          'x-b3-sampled': false
+          'x-b3-sampled': '0'
         });
 
       test.equal(t.name, 'POST');
@@ -259,7 +259,7 @@ module.exports = {
             'headers' : {
                'x-b3-traceid': '0000000000000001',
                'x-b3-spanid': '000000000000000a',
-               'x-b3-sampled': false
+               'x-b3-sampled': '0'
             }
         };
         var t = trace.Trace.fromRequest(request, 'test', true);
@@ -271,7 +271,7 @@ module.exports = {
             'headers' : {
                'x-b3-traceid': '0000000000000001',
                'x-b3-spanid': '000000000000000a',
-               'x-b3-sampled': true
+               'x-b3-sampled': '1'
             }
         };
         var t = trace.Trace.fromRequest(request, 'test', false);
