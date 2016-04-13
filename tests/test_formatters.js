@@ -32,6 +32,11 @@ var testcases = {
     annotations: [new trace.Annotation.timestamp('name1', 1),
                   new trace.Annotation.string('name2', '2')]
   },
+  trace_with_optional_params: {
+    trace: new trace.Trace('test', {spanId: 10, traceId:1, debug: true}),
+    annotations: [new trace.Annotation.timestamp('name1', 1, 123),
+                  new trace.Annotation.string('name2', '2')]
+  },
   trace_with_parentSpanId: {
     trace: new trace.Trace('test', {parentSpanId:5, spanId: 10, traceId:1}),
     annotations: []
@@ -68,6 +73,11 @@ var testZipkinFormatter = function (test, testcase, expected) {
         var prot = new tprotocol.TBinaryProtocol(trans);
         var span = new zipkinCore_types.Span();
         span.read(prot);
+        _.each(span.binary_annotations, function (annotation) {
+          if (annotation.value) {
+            annotation.value = annotation.value.toString();
+          }
+        });
         test.deepEqual(span, expected);
         test.done();
       });
@@ -89,6 +99,27 @@ module.exports = {
             key: 'name1',
             value: 1,
             type: 'timestamp'
+          },
+          {
+            key: 'name2',
+            value: '2',
+            type: 'string'
+          }
+        ]
+      }]);
+    },
+    test_trace_with_optional_params: function (test) {
+      testRestkinFormatter(test, testcases.trace_with_optional_params, [{
+        trace_id: '0000000000000001',
+        span_id: '000000000000000a',
+        name: 'test',
+        debug: true,
+        annotations: [
+          {
+            key: 'name1',
+            value: 1,
+            type: 'timestamp',
+            duration: 123
           },
           {
             key: 'name2',
@@ -139,6 +170,26 @@ module.exports = {
           annotations: [ new zipkinCore_types.Annotation({
             timestamp: new Int64(1),
             value: 'name1'
+          })],
+          binary_annotations: [ new zipkinCore_types.BinaryAnnotation({
+            value: '2',
+            key: 'name2',
+            annotation_type: zipkinCore_types.AnnotationType.STRING
+          })]
+        }));
+    },
+    test_trace_with_optional_params: function(test){
+      testZipkinFormatter(
+        test, testcases.trace_with_optional_params,
+        new zipkinCore_types.Span({
+          trace_id: new Int64(1),
+          id: new Int64(10),
+          name: 'test',
+          debug: true,
+          annotations: [ new zipkinCore_types.Annotation({
+            timestamp: new Int64(1),
+            value: 'name1',
+            duration: 123
           })],
           binary_annotations: [ new zipkinCore_types.BinaryAnnotation({
             value: '2',
