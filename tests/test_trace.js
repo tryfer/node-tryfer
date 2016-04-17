@@ -254,7 +254,7 @@ module.exports = {
         test.equal(t.sampled, true);
         test.done();
     },
-    test_fromRequest_honours_inbound_dont_sample_header_over_local_do_sample_indicator : function(test){
+    test_fromRequest_honours_inbound_dont_sample_header_as_binary_over_local_do_sample_indicator : function(test){
         var request = {
             'headers' : {
                'x-b3-traceid': '0000000000000001',
@@ -266,12 +266,36 @@ module.exports = {
         test.equal(t.sampled, false);
         test.done();
     },
-    test_fromRequest_honours_inbound_do_sample_header_over_local_dont_sample_indicator : function(test){
+    test_fromRequest_honours_inbound_dont_sample_header_as_boolean_over_local_do_sample_indicator : function(test){
+        var request = {
+            'headers' : {
+               'x-b3-traceid': '0000000000000001',
+               'x-b3-spanid': '000000000000000a',
+               'x-b3-sampled': 'false'
+            }
+        };
+        var t = trace.Trace.fromRequest(request, 'test', true);
+        test.equal(t.sampled, false);
+        test.done();
+    },
+    test_fromRequest_honours_inbound_do_sample_header_as_binary_over_local_dont_sample_indicator : function(test){
         var request = {
             'headers' : {
                'x-b3-traceid': '0000000000000001',
                'x-b3-spanid': '000000000000000a',
                'x-b3-sampled': '1'
+            }
+        };
+        var t = trace.Trace.fromRequest(request, 'test', false);
+        test.equal(t.sampled, true);
+        test.done();
+    },
+    test_fromRequest_honours_inbound_do_sample_header_as_boolean_over_local_dont_sample_indicator : function(test){
+        var request = {
+            'headers' : {
+               'x-b3-traceid': '0000000000000001',
+               'x-b3-spanid': '000000000000000a',
+               'x-b3-sampled': 'true'
             }
         };
         var t = trace.Trace.fromRequest(request, 'test', false);
