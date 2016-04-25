@@ -123,6 +123,18 @@ module.exports = {
       test.deepEqual(tracer._calls.record[0], [[[t, [a]]]]);
       test.done();
     },
+    test_record_does_not_invoke_tracer_when_not_sampled: function(test){
+      var tracer, t, a;
+      tracer = new mockTracer();
+      t = new trace.Trace('test_trace', {
+          traceId: 1, spanId: 1, tracers: [tracer], sampled: false
+      });
+      a = trace.Annotation.clientSend(0);
+      t.record(a);
+
+      test.equal(tracer._calls.record.length, 0);
+      test.done();
+    },
     test_record_sets_annotation_endpoint: function(test){
       var tracer, e, t, a;
       tracer = new mockTracer();
@@ -140,7 +152,8 @@ module.exports = {
       var t = new trace.Trace('GET', {traceId: 1, spanId: 10});
       test.deepEqual(t.toHeaders(), {
         'X-B3-TraceId': '0000000000000001',
-        'X-B3-SpanId': '000000000000000a'
+        'X-B3-SpanId': '000000000000000a',
+        'X-B3-Sampled' : '1'
       });
       test.done();
     },
@@ -149,7 +162,8 @@ module.exports = {
       test.deepEqual(t.toHeaders(), {
         'X-B3-TraceId': '0000000000000001',
         'X-B3-SpanId': '000000000000000a',
-        'X-B3-ParentSpanId': '0000000000000005'
+        'X-B3-ParentSpanId': '0000000000000005',
+        'X-B3-Sampled' : '1'
       });
       test.done();
     },
@@ -159,6 +173,7 @@ module.exports = {
       test.deepEqual(t.toHeaders(headers), {
         'X-B3-TraceId': '0000000000000001',
         'X-B3-SpanId': '000000000000000a',
+        'X-B3-Sampled' : '1',
         'Content-Type': 'application/json'
       });
       test.done();
@@ -198,6 +213,20 @@ module.exports = {
       test.equal(t.parentSpanId, formatters._hexStringify(5));
       test.done();
     },
+    test_fromHeaders_with_sampled: function(test) {
+      var t = trace.Trace.fromHeaders('POST',
+        {
+          'x-b3-traceid': '0000000000000001',
+          'x-b3-spanid': '000000000000000a',
+          'x-b3-sampled': '0'
+        });
+
+      test.equal(t.name, 'POST');
+      test.equal(t.traceId, formatters._hexStringify(1));
+      test.equal(t.spanId, formatters._hexStringify(10));
+      test.equal(t.sampled, false);
+      test.done();
+    },
     test_fromRequest_calls_fromHeaders: function(test) {
       var orig = trace.Trace.fromHeaders;
       var test_headers = {'hat': 'cat'};
@@ -213,6 +242,76 @@ module.exports = {
       };
       trace.Trace.fromRequest({method: 'POST', headers: test_headers});
       test.done();
+    },
+    test_fromRequest_defaults_sampled_behaviour_to_sampled : function(test){
+        var request = {
+            'headers' : {
+               'x-b3-traceid': '0000000000000001',
+               'x-b3-spanid': '000000000000000a'
+            }
+        };
+        var t = trace.Trace.fromRequest(request, 'test');
+        test.equal(t.sampled, true);
+        test.done();
+    },
+    test_fromRequest_honours_inbound_dont_sample_header_as_binary_over_local_do_sample_indicator : function(test){
+        var request = {
+            'headers' : {
+               'x-b3-traceid': '0000000000000001',
+               'x-b3-spanid': '000000000000000a',
+               'x-b3-sampled': '0'
+            }
+        };
+        var t = trace.Trace.fromRequest(request, 'test', true);
+        test.equal(t.sampled, false);
+        test.done();
+    },
+    test_fromRequest_honours_inbound_dont_sample_header_as_boolean_over_local_do_sample_indicator : function(test){
+        var request = {
+            'headers' : {
+               'x-b3-traceid': '0000000000000001',
+               'x-b3-spanid': '000000000000000a',
+               'x-b3-sampled': 'false'
+            }
+        };
+        var t = trace.Trace.fromRequest(request, 'test', true);
+        test.equal(t.sampled, false);
+        test.done();
+    },
+    test_fromRequest_honours_inbound_do_sample_header_as_binary_over_local_dont_sample_indicator : function(test){
+        var request = {
+            'headers' : {
+               'x-b3-traceid': '0000000000000001',
+               'x-b3-spanid': '000000000000000a',
+               'x-b3-sampled': '1'
+            }
+        };
+        var t = trace.Trace.fromRequest(request, 'test', false);
+        test.equal(t.sampled, true);
+        test.done();
+    },
+    test_fromRequest_honours_inbound_do_sample_header_as_boolean_over_local_dont_sample_indicator : function(test){
+        var request = {
+            'headers' : {
+               'x-b3-traceid': '0000000000000001',
+               'x-b3-spanid': '000000000000000a',
+               'x-b3-sampled': 'true'
+            }
+        };
+        var t = trace.Trace.fromRequest(request, 'test', false);
+        test.equal(t.sampled, true);
+        test.done();
+    },
+    test_fromRequest_honours_local_sampled_indicator_in_the_absence_of_an_inbound_sampled_header : function(test){
+        var request = {
+            'headers' : {
+               'x-b3-traceid': '0000000000000001',
+               'x-b3-spanid': '000000000000000a'
+            }
+        };
+        var t = trace.Trace.fromRequest(request, 'test', false);
+        test.equal(t.sampled, false);
+        test.done();
     },
     test_fromRequest_default_endpoint: function(test) {
       var t = trace.Trace.fromRequest({method: 'GET', headers: {}});
