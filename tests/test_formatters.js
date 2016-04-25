@@ -87,6 +87,19 @@ var testZipkinFormatter = function (test, testcase, expected) {
     });
 };
 
+
+// Helper function to test formatting for Zipkin Query API - takes a test object,
+// one of the test cases from above, and the expected object represented
+// by the formatted json string
+var testZipkinQueryApiFormatter = function (test, testcase, expected) {
+  formatters.formatForQueryService([[testcase.trace, testcase.annotations]],
+    function (formatError, jsonStr) {
+      test.equal(formatError, null);
+      test.deepEqual(JSON.parse(jsonStr), expected);
+      test.done();
+    });
+};
+
 module.exports = {
   restkinFormatterTests: {
     test_basic_trace_and_annotations: function(test){
@@ -230,6 +243,60 @@ module.exports = {
             })],
             binary_annotations: []
           }));
+    }
+  },
+  zipkinQueryServiceApiFormatter: {
+    test_basic_trace_and_annotations: function (test) {
+      testZipkinQueryApiFormatter(
+        test, testcases.basic_trace_and_annotations, [{
+          traceId: '0000000000000001',
+          id: '000000000000000a',
+          name: 'test',
+          annotations: [
+            {
+              'timestamp' : 1,
+              'value'     : 'name1'
+            }
+          ],
+          binaryAnnotations: [
+            {
+              key: 'name2',
+              value: '2',
+              type: 'string'
+            }
+          ]
+      }]);
+    },
+    test_trace_with_parentSpanId: function(test){
+      testZipkinQueryApiFormatter(
+        test, testcases.trace_with_parentSpanId, [{
+          traceId: '0000000000000001',
+          parentId: '0000000000000005',
+          id: '000000000000000a',
+          name: 'test',
+          annotations: [],
+          binaryAnnotations: []
+      }]);
+    },
+    test_trace_with_annotation_with_endpoint: function(test) {
+      testZipkinQueryApiFormatter(
+        test, testcases.trace_with_annotation_with_endpoint, [{
+          traceId: '0000000000000001',
+          id: '000000000000000a',
+          name: 'test',
+          annotations: [
+            {
+              value: 'name1',
+              timestamp: 1,
+              endpoint: {
+                ipv4: '1.1.1.1',
+                port: 5,
+                serviceName: 'service'
+              }
+            }
+          ],
+          binaryAnnotations: []
+        }]);
     }
   }
 };
