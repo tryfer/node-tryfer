@@ -1,6 +1,7 @@
 # node-tryfer: A Node Zipkin Tracer Library
 
 [![Build Status](https://secure.travis-ci.org/tryfer/node-tryfer.png?branch=master)](http://travis-ci.org/tryfer/node-tryfer)
+[![Known Vulnerabilities](https://snyk.io/test/github/tryfer/node-tryfer/061ed05a172b70fe04154214d1519be9246ecf5a/badge.svg)](https://snyk.io/test/github/tryfer/node-tryfer/061ed05a172b70fe04154214d1519be9246ecf5a)
 
 Zipkin is a Distributed Tracing system, tryfer is a Python/Twisted client library for Zipkin, and node-tryfer is a port of tryfer.
 
