@@ -16,8 +16,8 @@ var util = require('util');
 
 var Int64 = require('node-int64');
 var _ = require('underscore');
-var tprotocol = require('../node_modules/thrift/lib/thrift/protocol');
-var ttransport = require('../node_modules/thrift/lib/thrift/transport');
+var tprotocol = require('../node_modules/thrift/lib/nodejs/lib/thrift/protocol');
+var ttransport = require('../node_modules/thrift/lib/nodejs/lib/thrift/transport');
 
 var formatters = require('..').formatters;
 var trace = require('..').trace;
